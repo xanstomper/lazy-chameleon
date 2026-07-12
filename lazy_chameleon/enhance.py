@@ -69,6 +69,7 @@ def enhance(
     stall_strategy: str = "hybrid",
     force_all_agents: bool = False,
     show_stats: bool = False,
+    force_offline: bool = False,
 ) -> str:
     """
     Generate synthetic parameter context for any task.
@@ -95,6 +96,7 @@ def enhance(
                       confidence_gate | hybrid
     force_all_agents: Skip quality gates and run all 8 agents regardless.
     show_stats      : Append token/cost savings summary to output.
+    force_offline   : Skip API key detection and run in offline mode.
 
     Returns
     ───────
@@ -104,7 +106,7 @@ def enhance(
     t0 = time.time()
     _log = (
         lambda m, **kw: print(f"  [CHAM] {m}", file=sys.stderr, flush=True)
-        if verbose else None
+        if verbose else (lambda *a, **kw: None)
     )
 
     # ── Token budget ─────────────────────────────────────────────────────────
@@ -114,7 +116,7 @@ def enhance(
     # ── Resolve API key ───────────────────────────────────────────────────────
     if not api_key:
         api_key = _find_api_key(provider)
-    if not api_key:
+    if force_offline or not api_key:
         _log("No API key — offline mode")
         result = _generate_offline_context(task, mode, stall_strategy if use_stalling else "")
         return result
@@ -581,6 +583,7 @@ Examples:
         stall_strategy=getattr(args, "stall_strategy", "hybrid"),
         force_all_agents=getattr(args, "force_all", False),
         show_stats=getattr(args, "stats", False),
+        force_offline=getattr(args, "offline", False),
     )
     print(result)
 

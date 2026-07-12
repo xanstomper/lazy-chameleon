@@ -164,13 +164,13 @@ class RateLimiter:
         self._rpm = rpm
         self._tpm = tpm
 
-        # burst capacity = 1 second worth of tokens
+        # burst capacity = 1 minute worth of tokens × burst multiplier
         self._req_bucket = _TokenBucket(
-            capacity=rpm * limits.burst_multiplier / 60,
+            capacity=rpm * limits.burst_multiplier,
             refill_rate=rpm / 60.0,
         )
         self._tok_bucket = _TokenBucket(
-            capacity=tpm * limits.burst_multiplier / 60,
+            capacity=tpm * limits.burst_multiplier,
             refill_rate=tpm / 60.0,
         )
         self._stats = RateLimitStats()

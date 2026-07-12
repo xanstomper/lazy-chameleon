@@ -426,7 +426,8 @@ class TestClassifierIntegrationOffline:
         result = enhance(
             "implement a Redis sliding window rate limiter in Python",
             mode="easy",
-            api_key="",   # forces offline path
+            api_key="",
+            force_offline=True,
         )
         assert isinstance(result, str)
         assert len(result) > 100
@@ -437,6 +438,7 @@ class TestClassifierIntegrationOffline:
             "audit authentication for SQL injection and privilege escalation",
             mode="easy",
             api_key="",
+            force_offline=True,
         )
         assert isinstance(result, str)
 
