@@ -1779,9 +1779,9 @@ def create_default_pipeline(
 
     # 4. Pre-configure with recommended datasets (if they exist in the registry)
     recommended_sources = [
-        "reasoning-distill-opus-4-7-max",
-        "deepseek-v4-distill-8000x",
-        "claude-mythos-distilled-25k",
+        "claude-opus-4-7-reasoning",    # Claude Opus 4.7 reasoning traces
+        "deepseek-r1-distill",           # DeepSeek-R1 800K distilled
+        "numinamath-cot",                # Competition math (AIME/AMC)
     ]
     available = [s for s in recommended_sources if s in DATASET_REGISTRY]
     if available:

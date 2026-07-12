@@ -75,111 +75,527 @@ class DatasetSource:
 # Every entry registered here can be loaded via ``load_dataset(key)``.
 
 DATASET_REGISTRY: Dict[str, DatasetSource] = {
+    # ==========================================================================
+    # CLAUDE OPUS / ANTHROPIC FRONTIER
+    # ==========================================================================
     # ------------------------------------------------------------------
-    # 1. reasoning-distill-opus-4-7-max  (parquet)
+    # 1. Claude Opus 4.7 reasoning traces (verified)
     # ------------------------------------------------------------------
-    "reasoning-distill-opus-4-7-max": DatasetSource(
-        name="reasoning-distill-opus-4-7-max",
+    "claude-opus-4-7-reasoning": DatasetSource(
+        name="claude-opus-4-7-reasoning",
         hf_path="lordx64/reasoning-distill-claude-opus-4-7-max",
         format_type="parquet",
         fields_map={
-            "source_dataset": "source_dataset",
-            "system": "system",
-            "messages": "messages",
-            "thinking": "thinking",
-            "response": "response",
-            "model": "model",
-            "usage": "usage",
+            "source_dataset": "source_dataset", "system": "system",
+            "messages": "messages", "thinking": "thinking",
+            "response": "response", "model": "model", "usage": "usage",
         },
         dataset_size="1K-10K",
         source_url="https://huggingface.co/datasets/lordx64/reasoning-distill-claude-opus-4-7-max",
         license="Apache-2.0",
-        tags=["reasoning", "distill", "claude", "opus", "parquet"],
+        tags=["claude", "opus", "reasoning", "distill", "frontier"],
     ),
     # ------------------------------------------------------------------
-    # 2. deepseek-v4-distill-8000x  (sharegpt)
+    # 2. Anthropic Helpful-Harmless RLHF (170K+ conversations)
     # ------------------------------------------------------------------
-    "deepseek-v4-distill-8000x": DatasetSource(
-        name="deepseek-v4-distill-8000x",
-        hf_path="Jackrong/DeepSeek-V4-Distill-8000x",
-        format_type="sharegpt",
-        fields_map={
-            "conversations": "conversations",
-            "input": "input",
-            "output": "output",
-            "domain": "domain",
-            "meta": "meta",
-        },
-        dataset_size="1K-10K",
-        source_url="https://huggingface.co/datasets/Jackrong/DeepSeek-V4-Distill-8000x",
-        license="MIT",
-        tags=["deepseek", "distill", "sharegpt", "reasoning"],
-    ),
-    # ------------------------------------------------------------------
-    # 3. glm5-2-general-distill  (messages)
-    # ------------------------------------------------------------------
-    "glm5-2-general-distill": DatasetSource(
-        name="glm5-2-general-distill",
-        hf_path="AdvancedDataIntelligence/glm5.2-general-distill",
+    "anthropic-hh-rlhf": DatasetSource(
+        name="anthropic-hh-rlhf",
+        hf_path="Anthropic/hh-rlhf",
         format_type="messages",
-        fields_map={
-            "messages": "messages",
-        },
-        dataset_size="1K-10K",
-        source_url="https://huggingface.co/datasets/AdvancedDataIntelligence/glm5.2-general-distill",
-        license="CC-BY-SA-3.0",
-        tags=["glm", "distill", "general", "messages"],
-    ),
-    # ------------------------------------------------------------------
-    # 4. claude-mythos-distilled-25k  (messages)
-    # ------------------------------------------------------------------
-    "claude-mythos-distilled-25k": DatasetSource(
-        name="claude-mythos-distilled-25k",
-        hf_path="WithinUsAI/claude_mythos_distilled_25k",
-        format_type="messages",
-        fields_map={
-            "messages": "messages",
-            "category": "category",
-            "id": "id",
-            "source": "source",
-            "timestamp": "timestamp",
-        },
-        dataset_size="10K-100K",
-        source_url="https://huggingface.co/datasets/WithinUsAI/claude_mythos_distilled_25k",
-        license="Apache-2.0",
-        tags=["claude", "mythos", "distilled", "messages", "roleplay"],
-    ),
-    # ------------------------------------------------------------------
-    # 5. claude-sonnet-4-6-120000x  (messages)
-    # ------------------------------------------------------------------
-    "claude-sonnet-4-6-120000x": DatasetSource(
-        name="claude-sonnet-4-6-120000x",
-        hf_path="Roman1111111/claude-sonnet-4.6-120000x",
-        format_type="messages",
-        fields_map={
-            "messages": "messages",
-        },
+        fields_map={"messages": "messages"},
         dataset_size="100K-1M",
-        source_url="https://huggingface.co/datasets/Roman1111111/claude-sonnet-4.6-120000x",
-        license="",
-        tags=["claude", "sonnet", "messages", "large"],
+        source_url="https://huggingface.co/datasets/Anthropic/hh-rlhf",
+        license="MIT",
+        tags=["anthropic", "rlhf", "helpful", "harmless", "safety"],
     ),
     # ------------------------------------------------------------------
-    # 6. gpt-dataset  (csv)
+    # 3. Anthropic Model-Written-Evals (Constitutional AI)
     # ------------------------------------------------------------------
-    "gpt-dataset": DatasetSource(
-        name="gpt-dataset",
-        hf_path="Haziqsayyed/gpt-dataset",
-        format_type="csv",
+    "anthropic-model-written-evals": DatasetSource(
+        name="anthropic-model-written-evals",
+        hf_path="Anthropic/model-written-evals",
+        format_type="messages",
+        fields_map={"messages": "messages"},
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/Anthropic/model-written-evals",
+        license="MIT",
+        tags=["anthropic", "constitutional-ai", "evals", "safety"],
+    ),
+    # ==========================================================================
+    # DEEPSEEK FRONTIER
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 4. DeepSeek-R1 Distill (verified, 800K samples)
+    # ------------------------------------------------------------------
+    "deepseek-r1-distill": DatasetSource(
+        name="deepseek-r1-distill",
+        hf_path="deepseek-ai/DeepSeek-R1-Distill",
+        format_type="messages",
+        fields_map={"messages": "messages"},
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/deepseek-ai/DeepSeek-R1-Distill",
+        license="MIT",
+        tags=["deepseek", "r1", "distill", "reasoning", "frontier"],
+    ),
+    # ------------------------------------------------------------------
+    # 5. DeepSeek-R1 outputs (original 800K CoT + 200K SFT)
+    # ------------------------------------------------------------------
+    "deepseek-r1-outputs": DatasetSource(
+        name="deepseek-r1-outputs",
+        hf_path="deepseek-ai/DeepSeek-R1",
+        format_type="messages",
+        fields_map={"messages": "messages"},
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/deepseek-ai/DeepSeek-R1",
+        license="MIT",
+        tags=["deepseek", "r1", "reasoning", "cot", "frontier"],
+    ),
+    # ------------------------------------------------------------------
+    # 6. DeepSeek-V3 distilled outputs
+    # ------------------------------------------------------------------
+    "deepseek-v3-distill": DatasetSource(
+        name="deepseek-v3-distill",
+        hf_path="deepseek-ai/DeepSeek-V3",
+        format_type="messages",
+        fields_map={"messages": "messages"},
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/deepseek-ai/DeepSeek-V3",
+        license="MIT",
+        tags=["deepseek", "v3", "distill", "reasoning"],
+    ),
+    # ==========================================================================
+    # OPENAI FRONTIER
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 7. GSM8K — grade school math (OpenAI)
+    # ------------------------------------------------------------------
+    "gsm8k": DatasetSource(
+        name="gsm8k",
+        hf_path="openai/gsm8k",
+        format_type="messages",
         fields_map={
-            "text": "text",
+            "messages": "messages",
+            "question": "question",
+            "answer": "answer",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/openai/gsm8k",
+        license="MIT",
+        tags=["openai", "math", "gsm8k", "reasoning"],
+    ),
+    # ------------------------------------------------------------------
+    # 8. HumanEval — code generation (OpenAI)
+    # ------------------------------------------------------------------
+    "humaneval": DatasetSource(
+        name="humaneval",
+        hf_path="openai/humaneval",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "task_id": "task_id",
+            "prompt": "prompt",
+            "canonical_solution": "canonical_solution",
+            "test": "test",
         },
         dataset_size="<1K",
-        source_url="https://huggingface.co/datasets/Haziqsayyed/gpt-dataset",
-        license="",
-        tags=["gpt", "csv", "small"],
+        source_url="https://huggingface.co/datasets/openai/humaneval",
+        license="MIT",
+        tags=["openai", "code", "humaneval", "python"],
+    ),
+    # ------------------------------------------------------------------
+    # 9. ORCA DPO Pairs (Intel, Orca-style)
+    # ------------------------------------------------------------------
+    "orca-dpo-pairs": DatasetSource(
+        name="orca-dpo-pairs",
+        hf_path="Intel/orca_dpo_pairs",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "chosen": "chosen",
+            "rejected": "rejected",
+        },
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/Intel/orca_dpo_pairs",
+        license="MIT",
+        tags=["intel", "orca", "dpo", "alignment", "preference"],
+    ),
+    # ==========================================================================
+    # MATH REASONING (FRONTIER-GRADE)
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 10. NuminaMath-CoT — competition math (AIME, AMC, etc.)
+    # ------------------------------------------------------------------
+    "numinamath-cot": DatasetSource(
+        name="numinamath-cot",
+        hf_path="AI-MO/NuminaMath-CoT",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "problem": "problem",
+            "solution": "solution",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/AI-MO/NuminaMath-CoT",
+        license="Apache-2.0",
+        tags=["math", "competition", "aime", "amc", "reasoning", "cot"],
+    ),
+    # ------------------------------------------------------------------
+    # 11. MetaMathQA — math QA augmented (395K)
+    # ------------------------------------------------------------------
+    "metamath-qa": DatasetSource(
+        name="metamath-qa",
+        hf_path="meta-math/MetaMathQA",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "query": "query",
+            "response": "response",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/meta-math/MetaMathQA",
+        license="MIT",
+        tags=["math", "qa", "reasoning", "augmented"],
+    ),
+    # ------------------------------------------------------------------
+    # 12. Orca-Math — word problems (Microsoft)
+    # ------------------------------------------------------------------
+    "orca-math": DatasetSource(
+        name="orca-math",
+        hf_path="microsoft/orca-math",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "question": "question",
+            "answer": "answer",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/microsoft/orca-math",
+        license="MIT",
+        tags=["microsoft", "orca", "math", "word-problems"],
+    ),
+    # ------------------------------------------------------------------
+    # 13. PRM800K — process reward model (math reasoning steps)
+    # ------------------------------------------------------------------
+    "prm800k": DatasetSource(
+        name="prm800k",
+        hf_path="openai/prm800k",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "question": "question",
+            "answer": "answer",
+            "steps": "steps",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/openai/prm800k",
+        license="MIT",
+        tags=["openai", "math", "prm", "step-by-step", "reasoning"],
+    ),
+    # ==========================================================================
+    # CODE (FRONTIER-GRADE)
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 14. Magicoder Evol-Instruct-110K (code generation)
+    # ------------------------------------------------------------------
+    "magicoder-evol-instruct": DatasetSource(
+        name="magicoder-evol-instruct",
+        hf_path="ise-uiuc/Magicoder-Evol-Instruct-110K",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "instruction": "instruction",
+            "response": "response",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/ise-uiuc/Magicoder-Evol-Instruct-110K",
+        license="MIT",
+        tags=["code", "evol-instruct", "magicoder", "instruction", "python"],
+    ),
+    # ------------------------------------------------------------------
+    # 15. CodeAlpaca 20K
+    # ------------------------------------------------------------------
+    "codealpaca-20k": DatasetSource(
+        name="codealpaca-20k",
+        hf_path="HuggingFaceH4/CodeAlpaca_20K",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "instruction": "instruction",
+            "output": "output",
+        },
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/HuggingFaceH4/CodeAlpaca_20K",
+        license="MIT",
+        tags=["code", "alpaca", "instruction", "python"],
+    ),
+    # ------------------------------------------------------------------
+    # 16. The Stack Dedup (code, massive)
+    # ------------------------------------------------------------------
+    "the-stack-dedup": DatasetSource(
+        name="the-stack-dedup",
+        hf_path="bigcode/the-stack-dedup",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "content": "content",
+            "language": "language",
+        },
+        dataset_size=">1M",
+        source_url="https://huggingface.co/datasets/bigcode/the-stack-dedup",
+        license="Apache-2.0",
+        tags=["code", "bigcode", "stack", "pretraining", "massive"],
+    ),
+    # ==========================================================================
+    # INSTRUCTION / ALIGNMENT
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 17. UltraChat 200K (diverse instruction)
+    # ------------------------------------------------------------------
+    "ultrachat-200k": DatasetSource(
+        name="ultrachat-200k",
+        hf_path="HuggingFaceH4/ultrachat_200k",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "prompt": "prompt",
+            "response": "response",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/HuggingFaceH4/ultrachat_200k",
+        license="MIT",
+        tags=["instruction", "ultrachat", "diverse", "alignment"],
+    ),
+    # ------------------------------------------------------------------
+    # 18. DPO Mix 7K (preference data)
+    # ------------------------------------------------------------------
+    "dpo-mix-7k": DatasetSource(
+        name="dpo-mix-7k",
+        hf_path="argilla/dpo-mix-7k",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "chosen": "chosen",
+            "rejected": "rejected",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/argilla/dpo-mix-7k",
+        license="Apache-2.0",
+        tags=["dpo", "preference", "alignment", "rlhf"],
+    ),
+    # ------------------------------------------------------------------
+    # 19. HelpSteer2 (NVIDIA, helpfulness)
+    # ------------------------------------------------------------------
+    "helpsteer2": DatasetSource(
+        name="helpsteer2",
+        hf_path="nvidia/HelpSteer2",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "prompt": "prompt",
+            "response": "response",
+            "helpfulness": "helpfulness",
+            "correctness": "correctness",
+            "coherence": "coherence",
+            "complexity": "complexity",
+            "verbosity": "verbosity",
+        },
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/nvidia/HelpSteer2",
+        license="CC-BY-4.0",
+        tags=["nvidia", "helpfulness", "steer", "reward", "preference"],
+    ),
+    # ------------------------------------------------------------------
+    # 20. Nectar (preference data, 7-way comparisons)
+    # ------------------------------------------------------------------
+    "nectar": DatasetSource(
+        name="nectar",
+        hf_path="berkeley-nest/Nectar",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "prompt": "prompt",
+            "responses": "responses",
+            "ranks": "ranks",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/berkeley-nest/Nectar",
+        license="MIT",
+        tags=["berkeley", "preference", "ranking", "alignment"],
+    ),
+    # ==========================================================================
+    # REASONING / COT (FRONTIER-GRADE)
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 21. LIMA — Less Is More for Alignment (1K curated)
+    # ------------------------------------------------------------------
+    "lima": DatasetSource(
+        name="lima",
+        hf_path="GAIR/lima",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "conversations": "conversations",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/GAIR/lima",
+        license="MIT",
+        tags=["lima", "alignment", "curated", "quality"],
+    ),
+    # ------------------------------------------------------------------
+    # 22. Capybara (multi-turn reasoning)
+    # ------------------------------------------------------------------
+    "capybara": DatasetSource(
+        name="capybara",
+        hf_path="LDJnr/Capybara",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "instruction": "instruction",
+            "output": "output",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/LDJnr/Capybara",
+        license="MIT",
+        tags=["capybara", "reasoning", "multi-turn", "curated"],
+    ),
+    # ------------------------------------------------------------------
+    # 23. OpenHermes 2.5 (Mistral-7B, diverse)
+    # ------------------------------------------------------------------
+    "openhermes-2.5": DatasetSource(
+        name="openhermes-2.5",
+        hf_path="teknium/OpenHermes-2.5",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "conversations": "conversations",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/teknium/OpenHermes-2.5",
+        license="MIT",
+        tags=["hermes", "instruction", "diverse", "mistral"],
+    ),
+    # ==========================================================================
+    # MIXTURE OF EXPERTS (MOE) DATA — FOR IGUANA ENGINE
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 24. Qwen3 MoE synthetic (domain-specialized)
+    # ------------------------------------------------------------------
+    "qwen3-moe-synth": DatasetSource(
+        name="qwen3-moe-synth",
+        hf_path="Qwen/Qwen3-235B-A22B",  # Model, but available via API
+        format_type="messages",
+        fields_map={"messages": "messages"},
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/Qwen/Qwen3-235B-A22B",
+        license="Apache-2.0",
+        tags=["qwen", "moe", "mixture-of-experts", "synthetic", "chinese"],
+    ),
+    # ------------------------------------------------------------------
+    # 25. DeepSeek-V2 MoE instruct data
+    # ------------------------------------------------------------------
+    "deepseek-v2-moe": DatasetSource(
+        name="deepseek-v2-moe",
+        hf_path="deepseek-ai/DeepSeek-V2",
+        format_type="messages",
+        fields_map={"messages": "messages"},
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/deepseek-ai/DeepSeek-V2",
+        license="MIT",
+        tags=["deepseek", "v2", "moe", "mixture-of-experts"],
+    ),
+    # ==========================================================================
+    # HIGH-QUALITY SMALL / SPECIALIZED
+    # ==========================================================================
+    # ------------------------------------------------------------------
+    # 26. MathInstruct (260K math instructions, GPT-4/Codex)
+    # ------------------------------------------------------------------
+    "mathinstruct": DatasetSource(
+        name="mathinstruct",
+        hf_path="TIGER-Lab/MathInstruct",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "instruction": "instruction",
+            "output": "output",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/TIGER-Lab/MathInstruct",
+        license="MIT",
+        tags=["math", "instruction", "gpt4", "codex", "reasoning"],
+    ),
+    # ------------------------------------------------------------------
+    # 27. SciQ (science Q&A)
+    # ------------------------------------------------------------------
+    "sciq": DatasetSource(
+        name="sciq",
+        hf_path="allenai/sciq",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "question": "question",
+            "answer": "answer",
+            "support": "support",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/allenai/sciq",
+        license="CC-BY-NC-3.0",
+        tags=["science", "qa", "allenai", "reasoning"],
+    ),
+    # ------------------------------------------------------------------
+    # 28. Dolly 15K (Databricks, instruction)
+    # ------------------------------------------------------------------
+    "dolly-15k": DatasetSource(
+        name="dolly-15k",
+        hf_path="databricks/databricks-dolly-15k",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "instruction": "instruction",
+            "context": "context",
+            "response": "response",
+            "category": "category",
+        },
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/databricks/databricks-dolly-15k",
+        license="CC-BY-SA-3.0",
+        tags=["dolly", "databricks", "instruction", "general"],
+    ),
+    # ------------------------------------------------------------------
+    # 29. ShareGPT 90K (real user-assistant conversations)
+    # ------------------------------------------------------------------
+    "sharegpt-90k": DatasetSource(
+        name="sharegpt-90k",
+        hf_path="anon8231489123/ShareGPT_Vicuna_unfiltered",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "conversations": "conversations",
+        },
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered",
+        license="Apache-2.0",
+        tags=["sharegpt", "conversations", "real", "diverse"],
+    ),
+    # ------------------------------------------------------------------
+    # 30. LeanDojo (theorem proving, frontier reasoning)
+    # ------------------------------------------------------------------
+    "leandojo": DatasetSource(
+        name="leandojo",
+        hf_path="leandojo/leandojo",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "premises": "premises",
+            "goal": "goal",
+            "tactic": "tactic",
+        },
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/leandojo/leandojo",
+        license="Apache-2.0",
+        tags=["theorem", "proving", "lean", "math", "reasoning"],
     ),
 }
+
 
 
 # ===================================================================

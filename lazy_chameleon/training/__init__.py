@@ -146,4 +146,22 @@ __all__ = [
     # Trajectory Collector
     "TrajectoryCollector", "CollectorConfig", "estimate_cost",
 ]
+# ── Real dataset registry (30+ frontier model datasets) ──────────────────────
+from .dataset_registry import (
+    DATASET_REGISTRY, DatasetSource, DistillationDataset,
+    load_dataset, list_available_datasets, search_datasets,
+    register_custom_source, get_source, UnifiedDatasetLoader, DatasetMix,
+)
+from .download_real_data import main as download_data_cli, DEFAULT_DATA_DIR
+
+__all__ += [
+    # Dataset Registry
+    "DATASET_REGISTRY", "DatasetSource", "DistillationDataset",
+    "load_dataset", "list_available_datasets", "search_datasets",
+    "register_custom_source", "get_source", "UnifiedDatasetLoader", "DatasetMix",
+    # Data Downloader
+    "download_data_cli", "DEFAULT_DATA_DIR",
+]
+
+
 __version__ = "2.5.0"
