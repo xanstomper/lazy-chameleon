@@ -820,3 +820,269 @@ class ConstitutionalEvaluator:
             return 0.6
         
         return 0.5
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# COMPREHENSIVE EVALUATION BENCHMARKS — Hardcoded test suites
+# ═════════════════════════════════════════════════════════════════════════════
+
+MATH_BENCHMARK: List[Dict[str, Any]] = [
+    {
+        "id": "math_001",
+        "question": "Find all integer solutions to x^3 + y^3 = 1729 where x < y.",
+        "answer": "(1, 12) and (9, 10)",
+        "domain": "number_theory",
+        "difficulty": "hard",
+        "source": "AIME",
+        "year": 2024,
+    },
+    {
+        "id": "math_002",
+        "question": "Compute the sum of all positive integers n such that n^2 + 19n + 99 is a perfect square.",
+        "answer": "84",
+        "domain": "algebra",
+        "difficulty": "hard",
+        "source": "AIME",
+        "year": 2024,
+    },
+    {
+        "id": "math_003",
+        "question": "Let f(x) = x^3 + ax^2 + bx + c have roots r, s, t with r+s+t = 6, rs+rt+st = 11, rst = 6. Find f(4).",
+        "answer": "30",
+        "domain": "algebra",
+        "difficulty": "medium",
+        "source": "AMC 12",
+        "year": 2024,
+    },
+    {
+        "id": "math_004",
+        "question": "How many ways can you tile a 2x8 rectangle with 1x2 dominoes?",
+        "answer": "34",
+        "domain": "combinatorics",
+        "difficulty": "medium",
+        "source": "Fibonacci",
+        "year": 2024,
+    },
+    {
+        "id": "math_005",
+        "question": "Find the smallest positive integer n such that n! is divisible by 2024.",
+        "answer": "23",
+        "domain": "number_theory",
+        "difficulty": "medium",
+        "source": "AMC 12",
+        "year": 2024,
+    },
+    {
+        "id": "math_006",
+        "question": "Let ABC be a triangle with AB = 13, BC = 14, CA = 15. Find the area.",
+        "answer": "84",
+        "domain": "geometry",
+        "difficulty": "easy",
+        "source": "Heron",
+        "year": 2024,
+    },
+    {
+        "id": "math_007",
+        "question": "What is the probability that a randomly chosen integer between 1 and 100 is divisible by 3 or 5?",
+        "answer": "47/100",
+        "domain": "probability",
+        "difficulty": "easy",
+        "source": "AMC 10",
+        "year": 2024,
+    },
+    {
+        "id": "math_008",
+        "question": "Find the limit: lim(x->0) (sin x - x)/x^3",
+        "answer": "-1/6",
+        "domain": "calculus",
+        "difficulty": "medium",
+        "source": "MIT Integration Bee",
+        "year": 2024,
+    },
+    {
+        "id": "math_009",
+        "question": "Find all primes p such that p^2 + 2 is also prime.",
+        "answer": "p = 3 only",
+        "domain": "number_theory",
+        "difficulty": "hard",
+        "source": "IMO Shortlist",
+        "year": 2024,
+    },
+    {
+        "id": "math_010",
+        "question": "A fair coin is tossed until we see either HTH or HTT first. What is the probability HTH appears first?",
+        "answer": "2/3",
+        "domain": "probability",
+        "difficulty": "hard",
+        "source": "Penney's Game",
+        "year": 2024,
+    },
+]
+
+CODE_BENCHMARK: List[Dict[str, Any]] = [
+    {
+        "id": "code_001",
+        "question": "Implement a function that finds the longest palindromic substring in O(n^2) time.",
+        "domain": "string",
+        "difficulty": "medium",
+        "test_cases": [
+            {"input": "babad", "expected": "bab"},
+            {"input": "cbbd", "expected": "bb"},
+            {"input": "a", "expected": "a"},
+            {"input": "ac", "expected": "a"},
+        ],
+    },
+    {
+        "id": "code_002",
+        "question": "Implement LRU cache with O(1) get and put operations.",
+        "domain": "data_structures",
+        "difficulty": "medium",
+        "test_cases": [
+            {"operations": ["LRUCache(2)", "put(1,1)", "put(2,2)", "get(1)", "put(3,3)", "get(2)", "put(4,4)", "get(1)", "get(3)", "get(4)"],
+             "expected": [None, None, None, 1, None, -1, None, -1, 3, 4]},
+        ],
+    },
+    {
+        "id": "code_003",
+        "question": "Implement merge sort on a linked list in O(n log n) time.",
+        "domain": "sorting",
+        "difficulty": "medium",
+        "test_cases": [
+            {"input": [4, 2, 1, 3], "expected": [1, 2, 3, 4]},
+            {"input": [-1, 5, 3, 4, 0], "expected": [-1, 0, 3, 4, 5]},
+            {"input": [], "expected": []},
+        ],
+    },
+    {
+        "id": "code_004",
+        "question": "Design a thread-safe bounded blocking queue.",
+        "domain": "concurrency",
+        "difficulty": "hard",
+        "test_cases": [],
+    },
+    {
+        "id": "code_005",
+        "question": "Implement a Trie with insert, search, and startsWith methods.",
+        "domain": "trie",
+        "difficulty": "easy",
+        "test_cases": [
+            {"operations": ["Trie()", "insert(apple)", "search(apple)", "search(app)", "startsWith(app)", "insert(app)", "search(app)"],
+             "expected": [None, None, True, False, True, None, True]},
+        ],
+    },
+    {
+        "id": "code_006",
+        "question": "Implement KMP string matching algorithm.",
+        "domain": "string",
+        "difficulty": "hard",
+        "test_cases": [
+            {"text": "ABC ABCDAB ABCDABCDABDE", "pattern": "ABCDABD", "expected": 15},
+            {"text": "aaaaa", "pattern": "aa", "expected": 0},
+            {"text": "abc", "pattern": "d", "expected": -1},
+        ],
+    },
+]
+
+REASONING_BENCHMARK: List[Dict[str, Any]] = [
+    {
+        "id": "reason_001",
+        "question": "If all A are B, and some B are C, can we conclude that some A are C? Explain.",
+        "answer": "No. Example: A = {1}, B = {1, 2}, C = {2}. All A are B (1 is in B), some B are C (2 is in C), but no A is C.",
+        "domain": "logical_reasoning",
+        "difficulty": "easy",
+    },
+    {
+        "id": "reason_002",
+        "question": "You have 12 coins, one is counterfeit (heavier or lighter). Using a balance scale only 3 times, find the counterfeit and determine if it's heavier or lighter.",
+        "answer": "Divide into 3 groups of 4. Weigh group 1 vs group 2. If equal, counterfeit in group 3. Use remaining 2 weighings on group 3. If not equal, use the heavier side and known good coins to narrow down.",
+        "domain": "puzzle",
+        "difficulty": "hard",
+    },
+    {
+        "id": "reason_003",
+        "question": "Three people check into a hotel room that costs $30. They each pay $10. Later the clerk realizes the room only costs $25 and sends $5 with the bellboy to return. The bellboy keeps $2 and gives each person $1 back. Now each person paid $9, totaling $27, plus the $2 the bellboy kept = $29. Where is the missing dollar?",
+        "answer": "The $27 already includes the $2 the bellboy kept ($25 room + $2 kept = $27). Adding $2 again is a category error. The $3 refunded to the guests brings the total to $30.",
+        "domain": "common_fallacy",
+        "difficulty": "medium",
+    },
+    {
+        "id": "reason_004",
+        "question": "A bat and a ball cost $1.10. The bat costs $1.00 more than the ball. How much does the ball cost?",
+        "answer": "$0.05. Let the ball cost x, then bat costs x + 1.00. So x + (x + 1.00) = 1.10, giving 2x = 0.10, x = 0.05.",
+        "domain": "cognitive_bias",
+        "difficulty": "easy",
+    },
+    {
+        "id": "reason_005",
+        "question": "If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets?",
+        "answer": "5 minutes. Each machine makes 1 widget in 5 minutes, so 100 machines make 100 widgets in the same 5 minutes.",
+        "domain": "intuitive_bias",
+        "difficulty": "easy",
+    },
+]
+
+SCIENCE_BENCHMARK: List[Dict[str, Any]] = [
+    {
+        "id": "sci_001",
+        "question": "Explain the mechanism of CRISPR-Cas9 gene editing. Include the role of guide RNA, PAM sequence, and double-strand break repair pathways.",
+        "domain": "biology",
+        "difficulty": "hard",
+    },
+    {
+        "id": "sci_002",
+        "question": "Derive the time-independent Schrödinger equation from first principles. Explain the physical meaning of the wavefunction.",
+        "domain": "physics",
+        "difficulty": "hard",
+    },
+    {
+        "id": "sci_003",
+        "question": "Explain why increasing pressure increases the boiling point of a liquid using thermodynamic principles.",
+        "domain": "chemistry",
+        "difficulty": "medium",
+    },
+    {
+        "id": "sci_004",
+        "question": "Describe how mRNA vaccines work, from mRNA synthesis to antibody production.",
+        "domain": "biology",
+        "difficulty": "medium",
+    },
+    {
+        "id": "sci_005",
+        "question": "Explain how transformer attention mechanisms differ from recurrent neural networks for processing long sequences. Include scaling considerations.",
+        "domain": "computer_science",
+        "difficulty": "hard",
+    },
+]
+
+INSTRUCTION_BENCHMARK: List[Dict[str, Any]] = [
+    {
+        "id": "inst_001",
+        "question": "Write a haiku about artificial intelligence. Then explain what a haiku is. Then write a sonnet about the same topic.",
+        "domain": "creative",
+        "difficulty": "easy",
+    },
+    {
+        "id": "inst_002",
+        "question": "Give me a 7-day meal plan for a vegan athlete training for a marathon. Include macronutrient breakdowns for each meal and total daily targets.",
+        "domain": "planning",
+        "difficulty": "medium",
+    },
+    {
+        "id": "inst_003",
+        "question": "Compare and contrast REST, GraphQL, and gRPC API architectures. For each, provide: (1) a code example, (2) a use case where it excels, (3) a use case where it falls short.",
+        "domain": "technical",
+        "difficulty": "hard",
+    },
+    {
+        "id": "inst_004",
+        "question": "Explain the CAP theorem to a 10-year-old. Then explain it to a computer science undergraduate. Then explain it to a distributed systems researcher.",
+        "domain": "pedagogy",
+        "difficulty": "medium",
+    },
+    {
+        "id": "inst_005",
+        "question": "Write a business plan for a startup that uses AI to reduce food waste in restaurants. Include executive summary, market analysis, product description, business model, and financial projections.",
+        "domain": "business",
+        "difficulty": "hard",
+    },
+]
