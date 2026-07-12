@@ -8,7 +8,11 @@ faster student models. Includes:
 - Training via LoRA or OpenAI fine-tuning API
 - Multi-benchmark evaluation framework
 - Dataset management and mixing
+- Mass distillation pipeline (480B-10T scale)
+- MoE (Mixture-of-Experts) distillation
+- Cloud teacher adapter (OpenAI-compatible, Anthropic)
 """
+from __future__ import annotations
 
 from .synthetic_data_generator import (
     SyntheticDataGenerator,
@@ -32,6 +36,31 @@ from .evaluator import (
     EvalResult,
 )
 from .dataset import TrainingDataset, DataMixer
+
+# ── v2.5: Mass distillation components ─────────────────────────────────────────
+from .mass_distiller import (
+    MassDistillationPipeline,
+    MassDistillationConfig,
+    DistillationStage,
+    StageConfig,
+    DistillationRun,
+)
+from .moe_distiller import (
+    MoEDistillationPipeline,
+    MoERoutingDistiller,
+    MoEDistillationConfig,
+    ExpertRoutingRecord,
+    ExpertPattern,
+    ExpertDomain,
+)
+from .cloud_teacher import (
+    CloudTeacherAdapter,
+    CloudTeacherConfig,
+    CloudTeacherEnsemble,
+    TeacherEnsembleConfig,
+    TeacherResponseCache,
+    TeacherCall,
+)
 
 __all__ = [
     # Data Generation
@@ -59,6 +88,26 @@ __all__ = [
     # Dataset
     "TrainingDataset",
     "DataMixer",
+    # Mass Distillation (v2.5)
+    "MassDistillationPipeline",
+    "MassDistillationConfig",
+    "DistillationStage",
+    "StageConfig",
+    "DistillationRun",
+    # MoE Distillation (v2.5)
+    "MoEDistillationPipeline",
+    "MoERoutingDistiller",
+    "MoEDistillationConfig",
+    "ExpertRoutingRecord",
+    "ExpertPattern",
+    "ExpertDomain",
+    # Cloud Teacher (v2.5)
+    "CloudTeacherAdapter",
+    "CloudTeacherConfig",
+    "CloudTeacherEnsemble",
+    "TeacherEnsembleConfig",
+    "TeacherResponseCache",
+    "TeacherCall",
 ]
 
-__version__ = "0.1.0"
+__version__ = "2.5.0"
