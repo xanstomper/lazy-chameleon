@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="lazylogo.png" alt="Lazy Chameleon" width="100%">
+</p>
+
 # 🦎 Lazy Chameleon
 
 **Turn a flash-class LLM into a frontier-grade reasoner — entirely at inference time.**
