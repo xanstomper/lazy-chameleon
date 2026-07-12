@@ -139,6 +139,10 @@ def _build_parser() -> argparse.ArgumentParser:
     # --- providers subcommand (info) ---
     sub.add_parser("providers", help="List available providers and default models")
 
+    # --- prompts subcommand (library) ---
+    from lazy_chameleon.prompts.cli import register_subparser
+    register_subparser(sub)
+
     return parser
 
 
@@ -231,6 +235,9 @@ def main() -> None:
         _cmd_providers()
     elif args.command == "enhance":
         _cmd_enhance(args)
+    elif args.command == "prompts":
+        from lazy_chameleon.prompts.cli import handle as prompts_handle
+        prompts_handle(args)
     else:
         # Bare `chameleon <task>` without subcommand — treat as enhance
         if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
