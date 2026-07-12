@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-from lazy_chameleon.prompts import SystemPrompt, SystemPromptLibrary, get_library
+from lazy_chameleon.prompts._library_init import SystemPrompt, SystemPromptLibrary, get_library
 
 
 # ──────────────────────────────────────────────────────────────────────────────

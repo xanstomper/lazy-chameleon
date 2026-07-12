@@ -18,7 +18,7 @@ import textwrap
 from pathlib import Path
 from typing import List, Optional
 
-from lazy_chameleon.prompts import SystemPromptLibrary, get_library
+from lazy_chameleon.prompts._library_init import SystemPromptLibrary, get_library
 
 
 def register_subparser(sub: argparse._SubParsersAction) -> None:
