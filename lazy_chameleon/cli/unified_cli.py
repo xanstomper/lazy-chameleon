@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional
 
 def _output(result: Any, json_mode: bool):
     if json_mode:
-        print(json.dumps(result, default=str, indent=2))
+        print(json.dumps(result, default=str, separators=(",",":"), ensure_ascii=False))
     else:
         if isinstance(result, dict):
             for k, v in result.items():
@@ -47,8 +47,8 @@ def _output(result: Any, json_mode: bool):
                     print(f"\n{k}:")
                     for item in v[:10]:
                         print(f"  - {item}")
-                    if len(v) > 10:
-                        print(f"  ... and {len(v)-10} more")
+                    if len(v) > 5:
+                        print(f"  ... {len(v)-5} more")
                 else:
                     print(f"{k}: {v}")
         else:
@@ -58,23 +58,23 @@ def _output(result: Any, json_mode: bool):
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="chameleon",
-        description="Lazy Chameleon v2.6 — Universal LLM Tool Suite",
+        description="LC v2.6 — Universal LLM tools",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Any LLM can use this as a tool. Add --json for structured output.",
+        epilog="Any LLM can use. --json for compact output.",
     )
-    parser.add_argument("--json", action="store_true", help="Output in JSON format for LLM consumption")
-    parser.add_argument("--quiet", action="store_true", help="Suppress non-essential output")
+    parser.add_argument("--json", action="store_true", help="JSON output")
+    parser.add_argument("--quiet", action="store_true", help="Compact mode")
     sub = parser.add_subparsers(dest="command", help="Module to use")
     
     # ── enhance ──
-    enh = sub.add_parser("enhance", help="Generate synthetic context for any task")
+    enh = sub.add_parser("enhance", help="Synth context")
     enh.add_argument("task", nargs="?", help="Task description")
     enh.add_argument("--mode", choices=["easy", "medium", "hard", "extreme"], default="medium")
     enh.add_argument("--domain", default="general", help="Domain: math, code, reasoning, etc")
     enh.add_argument("--stats", action="store_true", help="Show enhancement statistics")
     
     # ── prompts ──
-    prompts = sub.add_parser("prompts", help="Browse/search/show leaked system prompts")
+    prompts = sub.add_parser("prompts", help="Browse/search leaked prompts")
     prompts.add_argument("action", choices=["browse", "search", "show", "stats", "providers", "models"])
     prompts.add_argument("--provider", help="Filter by provider")
     prompts.add_argument("--model", help="Filter by model")
@@ -83,7 +83,7 @@ def build_parser():
     prompts.add_argument("--max", type=int, default=10, help="Max search results")
     
     # ── data ──
-    data = sub.add_parser("data", help="Access all datasets (hardcoded + registry)")
+    data = sub.add_parser("data", help="Access all datasets")
     data.add_argument("action", choices=["list", "get", "search", "summary", "download"])
     data.add_argument("--domain", help="Filter by domain")
     data.add_argument("--model", help="Filter by model")
@@ -92,13 +92,13 @@ def build_parser():
     data.add_argument("--samples", type=int, default=10, help="Number of samples")
     
     # ── models ──
-    models = sub.add_parser("models", help="List/query all supported models")
+    models = sub.add_parser("models", help="List/query models")
     models.add_argument("action", choices=["list", "get", "compare"], default="list", nargs="?")
     models.add_argument("--provider", help="Filter by provider")
     models.add_argument("--name", help="Model name")
     
     # ── brew ──
-    brew = sub.add_parser("brew", help="Brew data using distillation pots")
+    brew = sub.add_parser("brew", help="Brew data via pots")
     brew.add_argument("action", choices=["start", "brew", "pour", "stats", "recipe"], default="stats")
     brew.add_argument("--pots", type=int, default=8, help="Number of distillation pots")
     brew.add_argument("--domain", default="general", help="Brewing domain")
@@ -106,7 +106,7 @@ def build_parser():
     brew.add_argument("--recipe", choices=["light", "standard", "rich", "dark", "special_reserve"], default="standard")
     
     # ── moe ──
-    moe = sub.add_parser("moe", help="Control MoE expert splitting/merging")
+    moe = sub.add_parser("moe", help="Control MoE split/merge")
     moe.add_argument("action", choices=["start", "split", "merge", "work", "brew", "stats", "report"], default="stats")
     moe.add_argument("--cells", type=int, default=4, help="Number of cells to split into")
     moe.add_argument("--mass", type=float, default=100.0, help="Initial MoE mass")
@@ -115,7 +115,7 @@ def build_parser():
     moe.add_argument("--child-ids", nargs="*", help="Child cell IDs to merge")
     
     # ── distill ──
-    distill = sub.add_parser("distill", help="Run distillation pipelines")
+    distill = sub.add_parser("distill", help="Run distillation")
     distill.add_argument("action", choices=["run", "multi-teacher", "progressive", "online", "self", "list"], default="list")
     distill.add_argument("--teacher", help="Teacher model")
     distill.add_argument("--student", help="Student model")
@@ -124,7 +124,7 @@ def build_parser():
     distill.add_argument("--layers", nargs="*", type=int, help="Target layers")
     
     # ── token-saver ──
-    ts = sub.add_parser("token-saver", help="Optimize prompts for token efficiency")
+    ts = sub.add_parser("token-saver", help="Optimize token usage")
     ts.add_argument("action", choices=["compress", "prune", "optimize", "stats", "pipeline"], default="pipeline")
     ts.add_argument("--text", help="Text to optimize")
     ts.add_argument("--ratio", type=float, default=0.5, help="Compression ratio")
@@ -132,7 +132,7 @@ def build_parser():
     ts.add_argument("--method", choices=["llmlingua", "selective", "concise", "hybrid"], default="hybrid")
     
     # ── engines ──
-    engines = sub.add_parser("engines", help="Run inference engines")
+    engines = sub.add_parser("engines", help="Inference engines")
     engines.add_argument("action", choices=["infer", "batch", "stream", "list", "speculative"], default="list")
     engines.add_argument("--prompt", help="Prompt for inference")
     engines.add_argument("--model", default="auto", help="Model to use")
@@ -140,39 +140,39 @@ def build_parser():
     engines.add_argument("--temperature", type=float, default=0.1)
     
     # ── wrappers ──
-    wraps = sub.add_parser("wrappers", help="Use provider wrappers/fallbacks")
+    wraps = sub.add_parser("wrappers", help="Provider wrappers")
     wraps.add_argument("action", choices=["generate", "providers", "cache-stats", "fallback-test"], default="providers")
     wraps.add_argument("--text", help="Text to generate")
     wraps.add_argument("--provider", help="Provider to use")
     
     # ── frameworks ──
-    fw = sub.add_parser("frameworks", help="Run evaluation/testing frameworks")
+    fw = sub.add_parser("frameworks", help="Eval/test frameworks")
     fw.add_argument("action", choices=["eval", "test", "suites", "results"], default="suites")
     fw.add_argument("--suite", help="Suite name")
     fw.add_argument("--metric", help="Metric to evaluate")
     
     # ── methodology ──
-    meth = sub.add_parser("methodology", help="Apply prompt/training methods")
+    meth = sub.add_parser("methodology", help="Prompt/train methods")
     meth.add_argument("action", choices=["prompt", "train", "optimize", "list"], default="list")
     meth.add_argument("--technique", help="Prompt technique to apply")
     meth.add_argument("--domain", help="Domain for recommendation")
     meth.add_argument("--task", help="Task description")
     
     # ── synthesizers ──
-    synth = sub.add_parser("synthesizers", help="Generate synthetic data/prompts")
+    synth = sub.add_parser("synthesizers", help="Gen synthetic data")
     synth.add_argument("action", choices=["generate", "prompt", "curriculum", "knowledge", "params"], default="params")
     synth.add_argument("--domain", default="general", help="Domain for synthesis")
     synth.add_argument("--count", type=int, default=10, help="Number to generate")
     synth.add_argument("--task", help="Task description")
     
     # ── longcat ──
-    lc = sub.add_parser("longcat", help="Use LongCat-2 MoE framework")
+    lc = sub.add_parser("longcat", help="LongCat-2 MoE")
     lc.add_argument("action", choices=["info", "datasets", "benchmarks", "run"], default="info")
     lc.add_argument("--benchmark", help="Benchmark name")
     lc.add_argument("--prompt", help="Prompt for generation")
     
     # ── owl-alpha ──
-    owl = sub.add_parser("owl-alpha", help="Use OWL-Alpha distillation")
+    owl = sub.add_parser("owl-alpha", help="OWL-Alpha distill")
     owl.add_argument("action", choices=["info", "distill", "models", "search", "train"], default="info")
     owl.add_argument("--base-model", help="Base model name")
     owl.add_argument("--alpha", type=float, help="Alpha value")
@@ -180,13 +180,13 @@ def build_parser():
     owl.add_argument("--lr", type=float, default=0.42, help="Learning rate")
     
     # ── tokenize ──
-    tok = sub.add_parser("tokenize", help="Optimize tokenization per domain")
+    tok = sub.add_parser("tokenize", help="Optimize tokenization")
     tok.add_argument("action", choices=["optimize", "estimate", "profiles", "compare"], default="profiles")
     tok.add_argument("--text", help="Text to tokenize")
     tok.add_argument("--profile", choices=["default", "code", "math", "chat", "scientific"], default="default")
     
     # ── config ──
-    cfg = sub.add_parser("config", help="View/export configuration")
+    cfg = sub.add_parser("config", help="View config")
     cfg.add_argument("action", choices=["show", "export", "providers", "models", "paths"], default="show")
     cfg.add_argument("--format", choices=["json", "yaml", "env"], default="json")
     

@@ -1,1 +1,3 @@
-"""Lazy Chameleon Unified CLI — One CLI for ALL modules. Every LLM can use this as a tool."""\nfrom .unified_cli import build_parser, main\n__all__ = ["build_parser", "main"]\n
+"""Lazy Chameleon Unified CLI — One CLI for ALL modules."""
+from .unified_cli import build_parser, main
+__all__ = ["build_parser", "main"]
