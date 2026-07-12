@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lazy-chameleon"
-version = "2.3.0"
-description = "Synthetic parameter generator that turns flash-class LLMs into frontier-grade reasoners at inference time."
+version = "2.6.0"
+description = "Synthetic parameter generator — turns flash-class LLMs into frontier-grade reasoners at inference time. Includes IGUANA MoE engine."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }

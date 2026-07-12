@@ -110,4 +110,40 @@ __all__ = [
     "TeacherCall",
 ]
 
+from .data_recipes import DataRecipe
+from .distillation_dataset import (
+    TrajectoryRecord, DistillationDataset as DistillationDatasetV2,
+    TrajectoryQualityScorer,
+)
+from .distillation_pipeline import (
+    DistillationPipeline, PipelineConfig as DistillationConfig,
+)
+from .mass_distillation import (
+    MassDistillationOrchestrator as MassDistillationPipeline,
+    MassDistillationConfig as MassDistillationConfigV2,
+    DASDScheduler,
+    DomainSampler,
+    QualityGate,
+    SFTFormatter,
+    run_mass_distillation,
+)
+from .trajectory_collector import (
+    TrajectoryCollector, CollectionConfig as CollectorConfig,
+    estimate_cost,
+)
+
+__all__ = [
+    # Data Recipes
+    "DataRecipe",
+    # Distillation Dataset
+    "TrajectoryRecord", "DistillationDatasetV2", "TrajectoryQualityScorer",
+    # Distillation Pipeline
+    "DistillationPipeline", "DistillationConfig",
+    # Mass Distillation
+    "MassDistillationPipeline", "MassDistillationConfigV2",
+    "DASDScheduler", "DomainSampler", "QualityGate", "SFTFormatter",
+    "run_mass_distillation",
+    # Trajectory Collector
+    "TrajectoryCollector", "CollectorConfig", "estimate_cost",
+]
 __version__ = "2.5.0"

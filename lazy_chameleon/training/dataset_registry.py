@@ -1,0 +1,754 @@
+"""
+HuggingFace dataset loaders and a registry for all known distillation datasets.
+
+Provides a unified interface for loading, converting, and mixing datasets from
+HuggingFace Hub in various formats (sharegpt, messages, parquet, csv). Integrates
+with the existing :class:`TrainingDataset` and :class:`DataPoint` classes.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import logging
+import random
+from collections import Counter, defaultdict
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Conditional datasets import
+# ---------------------------------------------------------------------------
+
+try:
+    import datasets as _hf_datasets
+
+    HF_AVAILABLE = True
+except ImportError:
+    _hf_datasets = None  # type: ignore[assignment]
+    HF_AVAILABLE = False
+
+# ---------------------------------------------------------------------------
+# DatasetSource metadata
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class DatasetSource:
+    """Metadata describing a known HuggingFace dataset that can be used for
+    knowledge-distillation training."""
+
+    name: str
+    """Short human-readable key used to reference this dataset in code / config."""
+
+    hf_path: str
+    """HuggingFace dataset identifier (e.g. lordx64/reasoning-distill-claude-opus-4-7-max)."""
+
+    format_type: str
+    """One of sharegpt, messages, parquet, csv.
+
+    - sharegpt : conversation list with {from, value} dicts.
+    - messages : list of {role, content} dicts.
+    - parquet  : arbitrary columns mapped via *fields_map*.
+    - csv      : single text column.
+    """
+
+    fields_map: Dict[str, str] = field(default_factory=dict)
+    """Maps logical field names to actual column names in the HuggingFace dataset."""
+
+    dataset_size: str = "unknown"
+    """Rough size estimate (e.g. <1K, 1K-10K, 10K-100K, 100K-1M)."""
+
+    source_url: str = ""
+    """Original URL / citation link for the dataset."""
+
+    license: str = ""
+    """SPDX license identifier (e.g. Apache-2.0, MIT)."""
+
+    tags: List[str] = field(default_factory=list)
+    """Arbitrary tags for filtering / search (e.g. reasoning, math, distill)."""
+
+# ===================================================================
+# DATASET REGISTRY
+# ===================================================================
+# Every entry registered here can be loaded via ``load_dataset(key)``.
+
+DATASET_REGISTRY: Dict[str, DatasetSource] = {
+    # ------------------------------------------------------------------
+    # 1. reasoning-distill-opus-4-7-max  (parquet)
+    # ------------------------------------------------------------------
+    "reasoning-distill-opus-4-7-max": DatasetSource(
+        name="reasoning-distill-opus-4-7-max",
+        hf_path="lordx64/reasoning-distill-claude-opus-4-7-max",
+        format_type="parquet",
+        fields_map={
+            "source_dataset": "source_dataset",
+            "system": "system",
+            "messages": "messages",
+            "thinking": "thinking",
+            "response": "response",
+            "model": "model",
+            "usage": "usage",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/lordx64/reasoning-distill-claude-opus-4-7-max",
+        license="Apache-2.0",
+        tags=["reasoning", "distill", "claude", "opus", "parquet"],
+    ),
+    # ------------------------------------------------------------------
+    # 2. deepseek-v4-distill-8000x  (sharegpt)
+    # ------------------------------------------------------------------
+    "deepseek-v4-distill-8000x": DatasetSource(
+        name="deepseek-v4-distill-8000x",
+        hf_path="Jackrong/DeepSeek-V4-Distill-8000x",
+        format_type="sharegpt",
+        fields_map={
+            "conversations": "conversations",
+            "input": "input",
+            "output": "output",
+            "domain": "domain",
+            "meta": "meta",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/Jackrong/DeepSeek-V4-Distill-8000x",
+        license="MIT",
+        tags=["deepseek", "distill", "sharegpt", "reasoning"],
+    ),
+    # ------------------------------------------------------------------
+    # 3. glm5-2-general-distill  (messages)
+    # ------------------------------------------------------------------
+    "glm5-2-general-distill": DatasetSource(
+        name="glm5-2-general-distill",
+        hf_path="AdvancedDataIntelligence/glm5.2-general-distill",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+        },
+        dataset_size="1K-10K",
+        source_url="https://huggingface.co/datasets/AdvancedDataIntelligence/glm5.2-general-distill",
+        license="CC-BY-SA-3.0",
+        tags=["glm", "distill", "general", "messages"],
+    ),
+    # ------------------------------------------------------------------
+    # 4. claude-mythos-distilled-25k  (messages)
+    # ------------------------------------------------------------------
+    "claude-mythos-distilled-25k": DatasetSource(
+        name="claude-mythos-distilled-25k",
+        hf_path="WithinUsAI/claude_mythos_distilled_25k",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+            "category": "category",
+            "id": "id",
+            "source": "source",
+            "timestamp": "timestamp",
+        },
+        dataset_size="10K-100K",
+        source_url="https://huggingface.co/datasets/WithinUsAI/claude_mythos_distilled_25k",
+        license="Apache-2.0",
+        tags=["claude", "mythos", "distilled", "messages", "roleplay"],
+    ),
+    # ------------------------------------------------------------------
+    # 5. claude-sonnet-4-6-120000x  (messages)
+    # ------------------------------------------------------------------
+    "claude-sonnet-4-6-120000x": DatasetSource(
+        name="claude-sonnet-4-6-120000x",
+        hf_path="Roman1111111/claude-sonnet-4.6-120000x",
+        format_type="messages",
+        fields_map={
+            "messages": "messages",
+        },
+        dataset_size="100K-1M",
+        source_url="https://huggingface.co/datasets/Roman1111111/claude-sonnet-4.6-120000x",
+        license="",
+        tags=["claude", "sonnet", "messages", "large"],
+    ),
+    # ------------------------------------------------------------------
+    # 6. gpt-dataset  (csv)
+    # ------------------------------------------------------------------
+    "gpt-dataset": DatasetSource(
+        name="gpt-dataset",
+        hf_path="Haziqsayyed/gpt-dataset",
+        format_type="csv",
+        fields_map={
+            "text": "text",
+        },
+        dataset_size="<1K",
+        source_url="https://huggingface.co/datasets/Haziqsayyed/gpt-dataset",
+        license="",
+        tags=["gpt", "csv", "small"],
+    ),
+}
+
+
+# ===================================================================
+# DistillationDataset  —  wraps a loaded HuggingFace dataset
+# ===================================================================
+
+
+class DistillationDataset:
+    """Wraps a loaded HuggingFace ``datasets.Dataset`` and provides a consistent
+    interface for extracting ``task`` / ``response`` pairs used during
+    knowledge distillation."""
+
+    def __init__(
+        self,
+        hf_dataset: Any,
+        source_name: str,
+        format_type: str,
+        fields_map: Optional[Dict[str, str]] = None,
+    ) -> None:
+        self._data = hf_dataset
+        self.source_name = source_name
+        self.format_type = format_type
+        self.fields_map = fields_map or {}
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __getitem__(self, idx: int) -> Dict[str, Any]:
+        raw = self._data[idx]
+        if self.format_type == "sharegpt":
+            return self._convert_sharegpt(raw)
+        elif self.format_type == "messages":
+            return self._convert_messages(raw)
+        elif self.format_type == "parquet":
+            return self._convert_parquet(raw)
+        elif self.format_type == "csv":
+            return self._convert_csv(raw)
+        else:
+            raise ValueError(f"Unsupported format_type: {self.format_type}")
+
+    def _convert_sharegpt(self, raw: Dict[str, Any]) -> Dict[str, Any]:
+        convos = raw.get("conversations") or raw.get(
+            self.fields_map.get("conversations", "conversations"), []
+        )
+        task = ""
+        response = ""
+        for msg in convos:
+            role = (msg.get("from") or "").lower()
+            if role in ("human", "user") and not task:
+                task = msg.get("value", "")
+            elif role in ("gpt", "assistant", "bot") and not response:
+                response = msg.get("value", "")
+        if not task:
+            task = str(raw.get(self.fields_map.get("input", "input"), ""))
+        if not response:
+            response = str(raw.get(self.fields_map.get("output", "output"), ""))
+        metadata = {
+            "source": self.source_name,
+            "format": "sharegpt",
+            "domain": raw.get(self.fields_map.get("domain", "domain"), ""),
+            "meta": raw.get(self.fields_map.get("meta", "meta"), {}),
+        }
+        return {"task": task, "response": response, "metadata": metadata}
+
+    def _convert_messages(self, raw: Dict[str, Any]) -> Dict[str, Any]:
+        msgs = raw.get("messages") or raw.get(
+            self.fields_map.get("messages", "messages"), []
+        )
+        task = ""
+        response = ""
+        system_prompt = ""
+        for msg in msgs:
+            role = (msg.get("role") or "").lower()
+            content = msg.get("content", "")
+            if role == "system":
+                system_prompt = content
+            elif role == "user" and not task:
+                task = content
+            elif role == "assistant" and not response:
+                response = content
+        if system_prompt and len(task) < len(system_prompt):
+            task = f"{system_prompt}\n\n{task}" if task else system_prompt
+        metadata: Dict[str, Any] = {
+            "source": self.source_name,
+            "format": "messages",
+        }
+        for k in ("category", "id", "source", "timestamp"):
+            mapped = self.fields_map.get(k, k)
+            if mapped in raw:
+                metadata[k] = raw[mapped]
+        return {"task": task, "response": response, "metadata": metadata}
+
+    def _convert_parquet(self, raw: Dict[str, Any]) -> Dict[str, Any]:
+        fm = self.fields_map
+        msgs: Any = raw.get(fm.get("messages", "messages"), [])
+        task = ""
+        response = ""
+        if isinstance(msgs, list) and msgs:
+            for msg in msgs:
+                role = (msg.get("role") or "").lower()
+                content = msg.get("content", "")
+                if role == "user" and not task:
+                    task = content
+                elif role == "assistant" and not response:
+                    response = content
+        if not task:
+            task = str(raw.get(fm.get("source_dataset", "source_dataset"), ""))
+        if not response:
+            response = str(raw.get(fm.get("response", "response"), ""))
+        metadata: Dict[str, Any] = {
+            "source": self.source_name,
+            "format": "parquet",
+            "thinking": str(raw.get(fm.get("thinking", "thinking"), "")),
+            "model": str(raw.get(fm.get("model", "model"), "")),
+            "system": str(raw.get(fm.get("system", "system"), "")),
+            "usage": raw.get(fm.get("usage", "usage"), {}),
+        }
+        return {"task": task, "response": response, "metadata": metadata}
+
+    def _convert_csv(self, raw: Dict[str, Any]) -> Dict[str, Any]:
+        text_col = self.fields_map.get("text", "text")
+        text = str(raw.get(text_col, ""))
+        parts = text.split("\n", 1)
+        task = parts[0].strip() if parts else ""
+        response = parts[1].strip() if len(parts) > 1 else task
+        return {
+            "task": task,
+            "response": response,
+            "metadata": {"source": self.source_name, "format": "csv"},
+        }
+
+    def to_training_dataset(self) -> "TrainingDataset":
+        from lazy_chameleon.training.dataset import DataPoint, TrainingDataset
+
+        datapoints: List[DataPoint] = []
+        for i in range(len(self._data)):
+            example = self[i]
+            dp = DataPoint(
+                input=example["task"],
+                output=example["response"],
+                task_type=self.source_name,
+                domain=example["metadata"].get("domain", "general"),
+                metadata=example["metadata"],
+            )
+            datapoints.append(dp)
+        logger.info(
+            "Converted %d examples from '%s' to TrainingDataset",
+            len(datapoints), self.source_name,
+        )
+        return TrainingDataset(datapoints)
+
+    def __repr__(self) -> str:
+        return (
+            f"DistillationDataset(source='{self.source_name}', "
+            f"format='{self.format_type}', rows={len(self)})"
+        )
+
+
+# ===================================================================
+# Load helper
+# ===================================================================
+
+
+def load_dataset(
+    source_key: str,
+    split: str = "train",
+    **kwargs: Any,
+) -> DistillationDataset:
+    """Load a registered dataset from HuggingFace Hub.
+
+    Parameters
+    ----------
+    source_key :
+        Key into :data:`DATASET_REGISTRY`.
+    split :
+        Dataset split to load (``"train"``, ``"test"``, …).
+    **kwargs :
+        Additional keyword arguments forwarded to :func:`datasets.load_dataset`.
+
+    Returns
+    -------
+    DistillationDataset
+        Wrapper around the loaded HuggingFace dataset.
+
+    Raises
+    ------
+    KeyError
+        If *source_key* is not in the registry.
+    ImportError
+        If the ``datasets`` package is not installed.
+    """
+    if source_key not in DATASET_REGISTRY:
+        raise KeyError(
+            f"Unknown dataset '{source_key}'. "
+            f"Available: {list(DATASET_REGISTRY.keys())}"
+        )
+
+    if not HF_AVAILABLE:
+        raise ImportError(
+            "The 'datasets' library is required to load datasets from "
+            "HuggingFace Hub. Install it with:  pip install datasets"
+        )
+
+    source = DATASET_REGISTRY[source_key]
+    logger.info(
+        "Loading dataset '%s' (hf_path=%s, split=%s) …",
+        source_key, source.hf_path, split,
+    )
+
+    load_kwargs: Dict[str, Any] = {"split": split, "trust_remote_code": True}
+    load_kwargs.update(kwargs)
+
+    hf_dataset = _hf_datasets.load_dataset(source.hf_path, **load_kwargs)
+
+    if isinstance(hf_dataset, dict):
+        if split in hf_dataset:
+            hf_dataset = hf_dataset[split]
+        else:
+            available = list(hf_dataset.keys())
+            logger.warning(
+                "Split '%s' not found; using first available '%s'. "
+                "Available: %s", split, available[0], available,
+            )
+            hf_dataset = hf_dataset[available[0]]
+
+    return DistillationDataset(
+        hf_dataset=hf_dataset,
+        source_name=source_key,
+        format_type=source.format_type,
+        fields_map=source.fields_map,
+    )
+
+
+# ===================================================================
+# Listing & search
+# ===================================================================
+
+
+def list_available_datasets() -> List[Dict[str, Any]]:
+    """Return metadata for every dataset in the registry."""
+    return [
+        {
+            "name": src.name,
+            "hf_path": src.hf_path,
+            "format_type": src.format_type,
+            "dataset_size": src.dataset_size,
+            "license": src.license,
+            "tags": src.tags,
+        }
+        for src in DATASET_REGISTRY.values()
+    ]
+
+
+def search_datasets(query: str) -> List[DatasetSource]:
+    """Search the registry for datasets matching *query* (case-insensitive)."""
+    q = query.lower()
+    results: List[DatasetSource] = []
+    for src in DATASET_REGISTRY.values():
+        if q in src.name.lower() or q in src.hf_path.lower() or any(q in tag.lower() for tag in src.tags):
+            results.append(src)
+    return results
+
+
+# ===================================================================
+# UnifiedDatasetLoader  —  load, deduplicate & merge
+# ===================================================================
+
+
+class UnifiedDatasetLoader:
+    """Load multiple datasets, deduplicate by task-response hash, and merge them
+    into a single :class:`TrainingDataset`."""
+
+    def __init__(
+        self,
+        default_split: str = "train",
+        deduplicate: bool = True,
+        max_samples_per_source: Optional[int] = None,
+    ) -> None:
+        self.default_split = default_split
+        self.deduplicate = deduplicate
+        self.max_samples_per_source = max_samples_per_source
+
+    def load(
+        self,
+        source_keys: List[str],
+        splits: Optional[Dict[str, str]] = None,
+        **load_kwargs: Any,
+    ) -> "TrainingDataset":
+        """Load and merge multiple datasets.
+
+        Parameters
+        ----------
+        source_keys :
+            Registry keys to load.
+        splits :
+            Optional per-key split overrides.
+        **load_kwargs :
+            Extra kwargs forwarded to :func:`load_dataset`.
+
+        Returns
+        -------
+        TrainingDataset
+            Merged (and optionally deduplicated) dataset.
+        """
+        from lazy_chameleon.training.dataset import TrainingDataset
+
+        all_datapoints: List[Any] = []
+        seen_hashes: set[str] = set()
+
+        for key in source_keys:
+            split = (splits or {}).get(key, self.default_split)
+            try:
+                dd = load_dataset(key, split=split, **load_kwargs)
+            except (KeyError, ImportError, Exception) as exc:
+                logger.error("Skipping '%s': %s", key, exc)
+                continue
+
+            td = dd.to_training_dataset()
+
+            if self.max_samples_per_source is not None and len(td) > self.max_samples_per_source:
+                td = td.sample(self.max_samples_per_source, strategy="uniform")
+
+            for dp in td.datapoints:
+                h = hashlib.md5(f"{dp.input}||{dp.output}".encode()).hexdigest()
+                if not self.deduplicate or h not in seen_hashes:
+                    seen_hashes.add(h)
+                    all_datapoints.append(dp)
+
+        result = TrainingDataset(all_datapoints)
+        logger.info(
+            "UnifiedDatasetLoader: merged %d sources into %d datapoints%s",
+            len(source_keys), len(result),
+            " (deduplicated)" if self.deduplicate else "",
+        )
+        return result
+
+
+# ===================================================================
+# DatasetMix  —  curriculum mixing with ratios
+# ===================================================================
+
+
+@dataclass
+class MixComponent:
+    """A single component in a :class:`DatasetMix`.
+
+    Attributes
+    ----------
+    source_key : str
+        Registry key of the dataset.
+    ratio : float
+        Relative sampling weight (e.g. ``0.3`` for 30 %).
+    split : str
+        Which split to load from this source (default ``"train"``).
+    max_samples : Optional[int]
+        Cap on the number of examples taken from this source.
+    """
+
+    source_key: str
+    ratio: float
+    split: str = "train"
+    max_samples: Optional[int] = None
+
+
+class DatasetMix:
+    """Combine multiple datasets with specified ratios for curriculum training.
+
+    Example usage::
+
+        mix = DatasetMix([
+            MixComponent("reasoning-distill-opus-4-7-max", ratio=0.4),
+            MixComponent("deepseek-v4-distill-8000x", ratio=0.3),
+        ])
+        dataset = mix.create(total_samples=10_000)
+
+    Parameters
+    ----------
+    components :
+        List of :class:`MixComponent` defining which sources and at what ratios.
+    seed :
+        Random seed for reproducibility.
+    """
+
+    def __init__(
+        self,
+        components: List[MixComponent],
+        seed: int = 42,
+    ) -> None:
+        if not components:
+            raise ValueError("At least one MixComponent is required.")
+        self.components = components
+        self.seed = seed
+
+    def create(
+        self,
+        total_samples: int,
+        **load_kwargs: Any,
+    ) -> "TrainingDataset":
+        """Build a mixed :class:`TrainingDataset` with approximately
+        ``total_samples`` examples.
+
+        Parameters
+        ----------
+        total_samples :
+            Desired total number of examples in the output dataset.
+        **load_kwargs :
+            Extra kwargs forwarded to :func:`load_dataset`.
+
+        Returns
+        -------
+        TrainingDataset
+        """
+        from lazy_chameleon.training.dataset import TrainingDataset
+
+        rng = random.Random(self.seed)
+
+        total_ratio = sum(c.ratio for c in self.components)
+        if total_ratio <= 0:
+            raise ValueError("Sum of component ratios must be positive.")
+
+        sampled: List[Any] = []
+        for comp in self.components:
+            norm = comp.ratio / total_ratio
+            try:
+                dd = load_dataset(comp.source_key, split=comp.split, **load_kwargs)
+            except (KeyError, ImportError, Exception) as exc:
+                logger.error("DatasetMix: skipping '%s': %s", comp.source_key, exc)
+                continue
+
+            td = dd.to_training_dataset()
+            if comp.max_samples is not None and len(td) > comp.max_samples:
+                td = td.sample(comp.max_samples, strategy="uniform", seed=self.seed)
+
+            target = max(1, int(total_samples * norm))
+            actual = min(target, len(td))
+            chosen = rng.sample(td.datapoints, actual)
+            for dp in chosen:
+                dp.metadata["mix_source"] = comp.source_key
+                dp.metadata["mix_ratio"] = comp.ratio
+            sampled.extend(chosen)
+            logger.info(
+                "DatasetMix: sampled %d / %d from '%s' (target %d)",
+                actual, len(td), comp.source_key, target,
+            )
+
+        if not sampled:
+            raise RuntimeError("DatasetMix: no datasets could be loaded.")
+
+        rng.shuffle(sampled)
+        result = TrainingDataset(sampled)
+        logger.info(
+            "DatasetMix: created mixed dataset with %d examples from %d sources",
+            len(result), len(self.components),
+        )
+        return result
+
+    def create_streaming(
+        self,
+        total_samples: int,
+        **load_kwargs: Any,
+    ) -> "TrainingDataset":
+        """Build a mixed dataset using streaming loads to minimise memory usage.
+
+        Parameters
+        ----------
+        total_samples :
+            Desired total number of examples.
+        **load_kwargs :
+            Extra kwargs forwarded to :func:`load_dataset`.
+
+        Returns
+        -------
+        TrainingDataset
+        """
+        from lazy_chameleon.training.dataset import TrainingDataset
+
+        rng = random.Random(self.seed)
+
+        total_ratio = sum(c.ratio for c in self.components)
+        if total_ratio <= 0:
+            raise ValueError("Sum of component ratios must be positive.")
+
+        sampled: List[Any] = []
+        for comp in self.components:
+            norm = comp.ratio / total_ratio
+            try:
+                dd = load_dataset(
+                    comp.source_key, split=comp.split,
+                    streaming=True, **load_kwargs,
+                )
+            except (KeyError, ImportError, Exception) as exc:
+                logger.error("DatasetMix (streaming): skipping '%s': %s", comp.source_key, exc)
+                continue
+
+            target = max(1, int(total_samples * norm))
+            fetch = target * 2
+            if comp.max_samples is not None:
+                fetch = min(fetch, comp.max_samples)
+
+            collected: List[Any] = []
+            for i, example in enumerate(dd._data):
+                if i >= fetch:
+                    break
+                collected.append(example)
+
+            stream_dd = DistillationDataset(
+                hf_dataset=collected,
+                source_name=comp.source_key,
+                format_type=DATASET_REGISTRY[comp.source_key].format_type,
+                fields_map=DATASET_REGISTRY[comp.source_key].fields_map,
+            )
+            stream_td = stream_dd.to_training_dataset()
+
+            actual = min(target, len(stream_td))
+            chosen = rng.sample(stream_td.datapoints, actual)
+            for dp in chosen:
+                dp.metadata["mix_source"] = comp.source_key
+                dp.metadata["mix_ratio"] = comp.ratio
+            sampled.extend(chosen)
+
+        rng.shuffle(sampled)
+        result = TrainingDataset(sampled)
+        logger.info(
+            "DatasetMix (streaming): created mixed dataset with %d examples from %d sources",
+            len(result), len(self.components),
+        )
+        return result
+
+
+# ===================================================================
+# Module-level helpers
+# ===================================================================
+
+
+def get_source(key: str) -> DatasetSource:
+    """Return the :class:`DatasetSource` metadata for a given registry key.
+
+    Raises :class:`KeyError` if the key is unknown.
+    """
+    if key not in DATASET_REGISTRY:
+        raise KeyError(
+            f"Unknown dataset '{key}'. Available: {list(DATASET_REGISTRY.keys())}"
+        )
+    return DATASET_REGISTRY[key]
+
+
+def register_custom_source(source: DatasetSource) -> None:
+    """Add a custom :class:`DatasetSource` to the global registry in-place.
+
+    The source is stored under ``source.name``.  If a key with that name
+    already exists it will be overwritten.
+    """
+    DATASET_REGISTRY[source.name] = source
+    logger.info("Registered custom dataset source '%s'", source.name)
+
+
+__all__ = [
+    # Data
+    "DatasetSource",
+    "MixComponent",
+    # Registry
+    "DATASET_REGISTRY",
+    "register_custom_source",
+    "get_source",
+    "list_available_datasets",
+    "search_datasets",
+    # Loader / wrapper
+    "DistillationDataset",
+    "load_dataset",
+    "UnifiedDatasetLoader",
+    "DatasetMix",
+]
