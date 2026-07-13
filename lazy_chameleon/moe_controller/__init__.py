@@ -7,10 +7,11 @@ Architecture:
 The synthesizers generate parameters from real data, the main agent reasons with them.
 """
 from .expert_splitter import ExpertSplitter, SplitConfig, ExpertRole, ExpertAssignment
+from .auto_moe import AutoMoE
 from .moe_controller import MoEController
 from .expert_splitter import ExpertSplitter, SplitConfig
 from .data_brewer import DataBrewer, BrewingConfig
 from .distillation_pot import DistillationPot, PotConfig
 from .agent_orchestrator import AgentOrchestrator
-__all__ = ["MoEController", "ExpertRole", "ExpertAssignment", "ExpertSplitter", "SplitConfig",
+__all__ = ["MoEController", "ExpertRole", "ExpertAssignment", "ExpertSplitter", "SplitConfig", "AutoMoE",
            "DataBrewer", "BrewingConfig", "DistillationPot", "PotConfig", "AgentOrchestrator"]
