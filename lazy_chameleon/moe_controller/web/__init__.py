@@ -1,5 +1,4 @@
-"""Web subsystem for MoE Controller."""
+"""Web subsystem for MoE Controller — Fully automatic, no dashboard, no user input needed."""
 from .moe_webcrawler import MoEWebCrawler, CrawlJob, ScrapedDocument, ScrapeSource
-from .moe_dashboard import MoEDashboard
 from .expert_trainer import ExpertTrainer
-__all__ = ["MoEWebCrawler", "CrawlJob", "ScrapedDocument", "ScrapeSource", "MoEDashboard", "ExpertTrainer"]
+__all__ = ["MoEWebCrawler", "CrawlJob", "ScrapedDocument", "ScrapeSource", "ExpertTrainer"]
