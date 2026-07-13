@@ -16,6 +16,7 @@ from .prompt_compressor import PromptCompressor, CompressionMethod
 from .token_pruner import TokenPruner, PruningStrategy
 from .speculative_decoder import SpeculativeDecoder
 from .token_saver_engine import TokenSaverEngine, TokenSaverPipeline
+from .token_minimizer import TokenMinimizer, MinimizerConfig, MinimizeResult
 from .adaptive_tokenizer import AdaptiveTokenizer, TokenizerProfile
 __all__ = [
     "LKVEviction", "LKVConfig",
@@ -23,6 +24,6 @@ __all__ = [
     "PromptCompressor", "CompressionMethod",
     "TokenPruner", "PruningStrategy",
     "SpeculativeDecoder",
-    "TokenSaverEngine", "TokenSaverPipeline",
+    "TokenSaverEngine", "TokenSaverPipeline", "TokenMinimizer", "MinimizerConfig", "MinimizeResult",
     "AdaptiveTokenizer", "TokenizerProfile",
 ]
