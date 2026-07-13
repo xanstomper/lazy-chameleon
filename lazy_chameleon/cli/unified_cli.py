@@ -23,6 +23,7 @@ Modules:
     longcat       Use LongCat-2 MoE framework
     owl-alpha     Use OWL-Alpha distillation
     tokenize      Optimize tokenization per domain
+    research      Access all research data (architectures, techniques, datasets)
     config        View/export configuration
 """
 
@@ -190,13 +191,23 @@ def build_parser():
     cfg.add_argument("action", choices=["show", "export", "providers", "models", "paths"], default="show")
     cfg.add_argument("--format", choices=["json", "yaml", "env"], default="json")
     
+    # ── research ──
+    rsch = sub.add_parser("research", help="Access all research data")
+    rsch.add_argument("action", choices=["summary", "techniques", "optimize"], default="summary")
+    rsch.add_argument("--model", help="Model for optimize")
+    rsch.add_argument("--task", help="Task for optimize")
+    
     return parser
 
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
+    if argv is None:
+        argv = sys.argv[1:]
+    json_mode = '--json' in argv
+    if json_mode:
+        argv = [a for a in argv if a != '--json']
     args = parser.parse_args(argv)
-    json_mode = args.json if hasattr(args, "json") else False
     
     if not args.command:
         parser.print_help()
@@ -252,9 +263,34 @@ def _dispatch(args) -> Any:
         return _handle_tokenize(args)
     elif cmd == "config":
         return _handle_config(args)
+    elif cmd == "research":
+        return _handle_research(args)
     else:
         return {"error": f"Unknown command: {cmd}"}
 
+
+
+def _handle_research(args) -> Any:
+    """Handle research commands."""
+    if args.action == "summary":
+        try:
+            from lazy_chameleon.pipeline.research_integration import get_coordinator
+            return get_coordinator().get_summary()
+        except Exception as e:
+            return {"error": str(e)}
+    elif args.action == "techniques":
+        try:
+            from lazy_chameleon.pipeline.research_integration import get_coordinator
+            return {"techniques": list(get_coordinator()._techniques.keys())}
+        except Exception as e:
+            return {"error": str(e)}
+    elif args.action == "optimize":
+        try:
+            from lazy_chameleon.pipeline.research_integration import get_coordinator
+            return get_coordinator().optimize_model(args.model or "default", task_hint=args.task or "")
+        except Exception as e:
+            return {"error": str(e)}
+    return {"error": "Unknown action"}
 
 def _handle_enhance(args) -> Any:
     try:
