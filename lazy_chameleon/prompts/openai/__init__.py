@@ -13,7 +13,7 @@ def _read_prompt(path: str) -> str:
     return ""
 
 # openai/4o-2025-09-03-new-personality.md
-4o_2025_09_03_new_personality: str = _read_prompt("4o-2025-09-03-new-personality.md")
+model_4o_2025_09_03_new_personality: str = _read_prompt("4o-2025-09-03-new-personality.md")
 
 # openai/API/README.md
 api_readme: str = _read_prompt("API/README.md")
@@ -281,7 +281,7 @@ tool_web_search: str = _read_prompt("tool-web-search.md")
 
 
 ALL_PROMPTS: Dict[str, str] = {
-    "4o_2025_09_03_new_personality": 4o_2025_09_03_new_personality,
+    "4o_2025_09_03_new_personality": model_4o_2025_09_03_new_personality,
     "api_readme": api_readme,
     "api_gpt_5_reasoning_effort_high_api": api_gpt_5_reasoning_effort_high_api,
     "api_o3_high_api": api_o3_high_api,
