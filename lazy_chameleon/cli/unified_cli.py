@@ -16,7 +16,7 @@ Modules:
     distill       Run distillation pipelines
     token-saver   Optimize prompts for token efficiency
     engines       Run inference engines
-    wrappers      Use provider wrappers/fallbacks
+    wrappers      Use provider wrappers (single model, no fallback)
     frameworks    Run evaluation/testing frameworks
     methodology   Apply prompt/training methods
     synthesizers  Generate synthetic data/prompts
@@ -141,7 +141,7 @@ def build_parser():
     
     # ── wrappers ──
     wraps = sub.add_parser("wrappers", help="Provider wrappers")
-    wraps.add_argument("action", choices=["generate", "providers", "cache-stats", "fallback-test"], default="providers")
+    wraps.add_argument("action", choices=["generate", "providers", "cache-stats"], default="providers")
     wraps.add_argument("--text", help="Text to generate")
     wraps.add_argument("--provider", help="Provider to use")
     

@@ -77,7 +77,6 @@ $ chameleon engines speculative --prompt "<p>"
 $ chameleon wrappers providers
 $ chameleon wrappers generate --text "<t>" [--provider <p>]
 $ chameleon wrappers cache-stats
-$ chameleon wrappers fallback-test --text "<t>"
 WRAPPERS: ProviderWrapper, ModelAdapter(conv), APIShim, CacheWrapper(LRU+TTL), FallbackWrapper(3providers,backoff)
 
 ===FRAMEWORKS(4 actions)========================================================

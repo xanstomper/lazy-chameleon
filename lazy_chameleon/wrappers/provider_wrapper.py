@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 @dataclass
 class WrapperConfig:
     default_provider: str = "auto"
-    fallback_providers: List[str] = field(default_factory=lambda: ["anthropic", "openai", "deepseek"])
     timeout: float = 60.0
     max_retries: int = 3
     cache_enabled: bool = True
@@ -36,7 +35,7 @@ class ProviderWrapper:
         return p.generate(prompt)
 
     def _select_best_provider(self) -> str:
-        return self.config.fallback_providers[0]
+        return "single_model"
 
     def get_stats(self) -> Dict:
         return dict(self._stats)

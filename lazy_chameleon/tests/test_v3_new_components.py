@@ -53,7 +53,7 @@ class TestTaskClassifier:
         assert r.task_type == "debugging"
         assert r.strategy == "chain_of_draft"
 
-    def test_general_fallback(self):
+    def test_general_single_model(self):
         clf = self._clf()
         r = clf.classify("the quick brown fox jumps over the lazy dog")
         assert r.task_type == "general"

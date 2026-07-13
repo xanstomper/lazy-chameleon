@@ -243,7 +243,6 @@ class OpenRouterBridge(BaseProviderBridge):
             self._config.default_model = "openrouter/auto"
 
         # Provider routing preferences
-        self._allow_fallbacks: bool = True
         self._ordered_providers: Optional[List[str]] = None
         self._ignore_providers: Optional[List[str]] = None
 
@@ -292,8 +291,6 @@ class OpenRouterBridge(BaseProviderBridge):
 
         # Provider routing
         route: Dict[str, Any] = {}
-        if not self._allow_fallbacks:
-            route["allow_fallbacks"] = False
         if self._ordered_providers:
             route["order"] = self._ordered_providers
         if self._ignore_providers:
@@ -346,12 +343,10 @@ class OpenRouterBridge(BaseProviderBridge):
 
     def set_provider_routing(
         self,
-        allow_fallbacks: bool = True,
         ordered_providers: Optional[List[str]] = None,
         ignore_providers: Optional[List[str]] = None,
     ) -> None:
         """Configure OpenRouter provider routing preferences."""
-        self._allow_fallbacks = allow_fallbacks
         self._ordered_providers = ordered_providers
         self._ignore_providers = ignore_providers
 
