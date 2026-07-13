@@ -98,13 +98,16 @@ $ chameleon research optimize --model <type> --task "<t>" --json
 [END HARNESS]"""
 
 MEGA_HARNESS_TOOLS = {
-    "enhance": {"description": "Generate synthetic parameter context for a task", "usage": "chameleon enhance "<task>" --mode <easy|medium|hard|extreme> [--domain <d>] [--stats]", "returns": "JSON with synthetic_params, context, stats"},
-    "prompts": {"description": "Browse/search/show 278 leaked system prompts", "usage": "chameleon prompts browse|search|show|stats [--provider <p>] [--query "<q>"] [--json]", "returns": "JSON array of prompt objects with provider, model, content"},
-    "data": {"description": "Access 1200+ training examples across 10 models, 7 domains", "usage": "chameleon data summary|get|search [--model <m>] [--domain <d>] [--json]", "returns": "JSON with training examples"},
-    "models": {"description": "List/compare 11+ frontier models", "usage": "chameleon models list|get|compare [--name <model>] [--json]", "returns": "JSON with model details"},
-    "brew": {"description": "Brew training data using distillation pots", "usage": "chameleon brew start|pour|stats [--pots N] [--domain <d>] [--recipe <r>] [--json]", "returns": "JSON with brewed samples"},
-    "moe": {"description": "Control MoE expert split/merge system", "usage": "chameleon moe start|split|work|merge|brew|report [--cells N] [--task "<t>"] [--json]", "returns": "JSON with MoE state"},
-    "distill": {"description": "Run distillation pipelines (multi-teacher, progressive, online, self)", "usage": "chameleon distill multi-teacher|progressive|online|self|list [--json]", "returns": "JSON with distillation results"},
-    "token-saver": {"description": "Compress/analyze/minimize prompts for token efficiency", "usage": "chameleon token-saver compress|analyze|minimize|stats [--text "<t>"] [--json]", "returns": "JSON with token stats"},
-    "research": {"description": "Access all research data: architectures, techniques, datasets", "usage": "chameleon research summary|techniques|optimize [--model <m>] [--task "<t>"] [--json]", "returns": "JSON with research data"},
+    "enhance": {"description": "Generate synthetic parameter context", "usage": "chameleon enhance <task>", "returns": "JSON with params"},
+    "prompts": {"description": "Browse/search 278 leaked prompts", "usage": "chameleon prompts browse|search", "returns": "JSON array"},
+    "data": {"description": "Access 1200+ training examples", "usage": "chameleon data summary|get", "returns": "JSON examples"},
+    "models": {"description": "List/compare frontier models", "usage": "chameleon models list|get", "returns": "JSON details"},
+    "brew": {"description": "Brew data using distillation pots", "usage": "chameleon brew start|pour", "returns": "JSON samples"},
+    "moe": {"description": "Control MoE split/merge", "usage": "chameleon moe start|split|report", "returns": "JSON state"},
+    "distill": {"description": "Run distillation pipelines", "usage": "chameleon distill multi-teacher|progressive", "returns": "JSON results"},
+    "token-saver": {"description": "Optimize prompts for token efficiency", "usage": "chameleon token-saver compress|stats", "returns": "JSON stats"},
+    "research": {"description": "Access all research data", "usage": "chameleon research summary|techniques", "returns": "JSON data"},
 }
+
+HARNESS_MENU = MEGA_HARNESS_SHORT.split("{")[1].split("}")[0] if "{" in MEGA_HARNESS_SHORT else MEGA_HARNESS_SHORT[:100]
+__all__ = ["MEGA_HARNESS", "MEGA_HARNESS_SHORT", "MEGA_HARNESS_TOOLS", "HARNESS_MENU"]
