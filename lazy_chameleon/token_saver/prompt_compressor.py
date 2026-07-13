@@ -98,7 +98,7 @@ class PromptCompressor:
         sections = re.split(r"(?=\n#|\n##|\n###)", prompt)
         result = []
         for sec in sections:
-            if "```" in sec or "\{" in sec or "important" in sec.lower():
+            if "```" in sec or "{" in sec or "important" in sec.lower():
                 result.append(sec)
             else:
                 lines = sec.split("\n")
