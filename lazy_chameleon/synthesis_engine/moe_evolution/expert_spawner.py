@@ -89,7 +89,11 @@ class ExpertPool:
 class ExpertSpawner:
     """Handles expert creation, splitting, merging, and evolution."""
 
-    def __init__(self, pool: ExpertPool, seed: int = 42):
+    def __init__(self, pool: Optional[ExpertPool] = None, num_experts: int = 8, seed: int = 42):
+        if pool is None:
+            import numpy as np
+            dummy = [{"w": np.random.randn(64, 64)} for _ in range(num_experts)]
+            pool = ExpertPool(expert_params=dummy, expert_ids=list(range(num_experts)))
         self.pool = pool
         self.rng = np.random.default_rng(seed)
         self.next_id = max(pool.expert_ids) + 1 if pool.expert_ids else 0
