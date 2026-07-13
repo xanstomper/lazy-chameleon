@@ -1,0 +1,95 @@
+"""OpenAI models — GPT-4.5, GPT-5, GPT-5.6 SOL, o-series."""
+from __future__ import annotations
+from typing import Any, Dict, List, Optional
+
+OPENAI = {
+    "name": "OpenAI",
+    "models": {
+        "gpt_4_5": {
+            "architecture": "Transformer with MoE, unknown total parameters, ~100 active",
+            "context_window": 128000,
+            "training_data": "Internet text (Common Crawl, web pages, books, code, academic papers) up to Oct 2023",
+            "modality": "Text, image input, function calling",
+            "knowledge_cutoff": "October 2023",
+            "system_prompt_style": "You are ChatGPT, a large language model... Be as precise as possible.",
+            "moe_config": "Mixture of Experts with ~8 experts active per token",
+            "alignment": "RLHF with human feedback, content filtering",
+            "key_innovation": "Improved factual accuracy, reduced hallucination, vision capabilities",
+            "inference_cost": "$10-20 per million tokens",
+            "knowledge_graph": "Internal knowledge graph with entity-relation mapping, semantic vector index",
+        },
+        "gpt_5": {
+            "architecture": "Deep MoE Transformer, ~1.8T total params, ~300B active per token",
+            "context_window": 256000,
+            "training_data": "Enhanced corpus: web, books, code, academic papers, synthetic reasoning traces",
+            "modality": "Text, image, audio input, structured outputs, function calling, code execution",
+            "knowledge_cutoff": "April 2025",
+            "system_prompt_style": "Multi-part system prompt with meta-instructions, safety guidelines, tool definitions",
+            "moe_config": "64+ experts, top-8 routing, shared expert isolation, load-balanced auxiliary loss",
+            "alignment": "RLHF + constitutional AI hybrid, multi-stage safety filtering",
+            "key_innovation": "Test-time compute scaling, chain-of-thought by default, tool-use native",
+            "inference_cost": "$30-60 per million tokens",
+        },
+        "gpt_5_6_sol": {
+            "architecture": "Frontier MoE Transformer, ~2.5T total params, ~500B active per token, SOL (Systems Optimization Layer)",
+            "context_window": 1000000,
+            "training_data": "Trillion-token corpus: all public text, reasoning traces, code execution results, image-audio-text pairs",
+            "modality": "Full multimodal: text, image, audio, video, code, structured data",
+            "knowledge_cutoff": "June 2026",
+            "system_prompt_style": "Dynamic multi-instruction system prompt with tool schemas, safety constraints, persona modulation",
+            "moe_config": "128+ experts, top-12 routing, dynamic expert creation, progressive sparsification",
+            "alignment": "Multi-stage constitutional AI + RLHF + self-play + debate training",
+            "key_innovation": "SOL optimization layer for real-time compute allocation, extended reasoning, agentic capabilities",
+            "inference_cost": "$100-200 per million tokens",
+            "knowledge_graph": "Full neural knowledge graph with dense entity embeddings, relational reasoning, real-time updates",
+            "training_method": "Muon optimizer, 4-stage training: pretrain -> SFT -> RLHF -> self-play refinement",
+        },
+        "o4": {
+            "architecture": "Reasoning-focused Transformer with extended chain-of-thought",
+            "context_window": 128000,
+            "training_data": "Reasoning traces, math, code, science, synthetic reasoning curricula",
+            "modality": "Text, image",
+            "system_prompt_style": "Minimal system prompt, emphasis on step-by-step reasoning",
+            "key_innovation": "Extended reasoning before answering, self-verification of steps, backtracking",
+            "inference_cost": "$50-100 per million tokens",
+        },
+    },
+    "training_pipeline": {
+        "stages": [
+            "Pretraining: Next-token prediction on massive corpus",
+            "SFT: Supervised fine-tuning on instruction data",
+            "RLHF: Reinforcement learning from human feedback",
+            "Self-play: Model generates its own training data, filters by reward model",
+            "Synthetic curriculum: Teacher models generate progressive difficulty data",
+        ],
+        "optimizer": "AdamW for 4.5, Muon for 5 and 5.6 SOL",
+        "batch_size": "3-12 million tokens",
+        "learning_rate_schedule": "Cosine decay with warmup, 1e-4 to 1e-5",
+    },
+    "datasets": [
+        "Common Crawl (filtered, deduplicated)", "WebText2 (Reddit outbound links)",
+        "Books (fiction, non-fiction, academic)", "GitHub code (all languages)",
+        "arXiv papers (all fields)", "Wikipedia (all languages)",
+        "Stack Exchange (QA pairs)", "Synthetic reasoning traces (teacher-generated)",
+        "Image-text pairs (LAION, internal datasets)", "Code execution traces (sandboxed Python)",
+        "Multi-turn conversation data (human-annotated)", "Safety evaluation datasets (red-teaming)",
+    ],
+    "prompt_patterns": [
+        "You are an AI assistant designed to provide helpful, accurate information",
+        "Follow the instructions carefully. Be precise and thorough.",
+        "If you are unsure about something, say so rather than making up information.",
+        "You have access to tools. Use them when appropriate.",
+        "Think step by step before answering complex questions.",
+    ],
+    "knowledge_graph_features": [
+        "Entity extraction and linking across documents",
+        "Relation extraction (subject-predicate-object triplets)",
+        "Temporal entity resolution (entities with time-aware embeddings)",
+        "Cross-document coreference resolution",
+        "Hierarchical topic clustering",
+        "Semantic vector search over entities",
+        "Multi-hop reasoning over graph paths",
+    ],
+}
+
+__all__ = ["OPENAI"]
