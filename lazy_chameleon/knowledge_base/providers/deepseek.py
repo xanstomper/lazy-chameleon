@@ -1,8 +1,12 @@
 """DeepSeek architecture — Fine-grained MoE, MLA, GRPO, R1 pipeline."""
 from __future__ import annotations
 from typing import Any, Callable, Dict, List, Optional, Tuple
-import numpy as np
 import time
+import numpy as np
+
+# =============================================================================
+# SECTION 1: DEEPSEEK ARCHITECTURE (Fine-Grained MoE, MLA, GRPO)
+
 
 DEEPSEEK_TECHNICAL = {
     "deepseek_moe": {
@@ -96,4 +100,3 @@ DEEPSEEK_TECHNICAL = {
     },
 }
 
-__all__ = ["DEEPSEEK_TECHNICAL"]
