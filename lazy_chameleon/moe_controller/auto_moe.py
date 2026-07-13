@@ -62,16 +62,10 @@ class AutoMoE:
         t0 = time.time()
         cycle_stats = {"cycle": self._cycle, "start": t0}
         
-        # Step 1: Crawl knowledge for all domains
-        if self._crawler:
-            for domain in ["math", "code", "reasoning", "science", "design", "security", "general"]:
-                for expert_id in range(1, min(8, self.num_experts)):
-                    try:
-                        jid = self._crawler.create_job(expert_id, domain, f"auto_{domain}", 25)
-                        self._crawler.run_job(jid)
-                    except:
-                        pass
-            cycle_stats["crawled"] = True
+        # Step 1: No auto-crawl. Wait for MoE to command specific research targets.
+        # Spawned agents only crawl when the main agent tells them exactly what to scrape.
+        cycle_stats["crawled"] = False
+        cycle_stats["auto_crawl_disabled"] = True
         
         # Step 2: Train all spawned experts
         if self._trainer:

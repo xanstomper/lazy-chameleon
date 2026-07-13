@@ -31,36 +31,43 @@ class MoEResearch:
         except Exception as e:
             logger.warning(f"Crawler init: {e}")
 
-    def research(self, topic: str, domain: str = "general", depth: str = "standard") -> Dict[str, Any]:
-        """Main agent researches a topic by commanding spawned experts to crawl it."""
+    def research(self, topic: str, domain: str = "general", sources: Optional[List[str]] = None, num_cells: int = 4) -> Dict[str, Any]:
+        """Main agent commands spawned experts to scrape SPECIFIC websites/sources.
+        
+        Args:
+            topic: What to research
+            domain: Knowledge domain
+            sources: SPECIFIC websites/URLs to scrape. If None, uses knowledge base.
+            num_cells: How many spawned experts to deploy
+        """
         t0 = time.time()
         if not self._crawler:
             self._init_crawler()
         
-        # Main agent creates crawl jobs (tells spawned experts what to research)
-        sources_to_check = []
-        if domain in ["math", "code", "reasoning", "science", "design", "security", "general"]:
-            sources_to_check.append(f"knowledge_base:{domain}")
-        sources_to_check.append(f"web:{topic}")
+        # Main agent tells spawned cells EXACTLY what to scrape
+        sources_to_scrape = sources or [f"kb://{domain}"]
         
         results = []
-        for source_desc in sources_to_check:
-            for expert_id in range(1, 5):  # Spawn 4 research cells
+        for source_url in sources_to_scrape:
+            for expert_id in range(1, num_cells + 1):
                 try:
-                    query = f"{topic} {domain}"
-                    jid = self._crawler.create_job(expert_id, domain, query, max_docs=20)
+                    if source_url.startswith("kb://"):
+                        query = f"{topic} {source_url.replace('kb://', '')}"
+                        jid = self._crawler.create_job(expert_id, domain, query, max_docs=15)
+                    else:
+                        jid = self._crawler.create_job(expert_id, domain, f"{topic} from {source_url}", max_docs=15)
                     job = self._crawler.run_job(jid)
                     training = self._crawler.job_to_training(jid)
                     results.extend(training)
                 except Exception as e:
-                    logger.warning(f"Research cell {expert_id} error: {e}")
+                    logger.warning(f"Cell {expert_id} scraping {source_url}: {e}")
         
-        # Merge all findings
         merged = self._merge_findings(results, topic, domain)
         merged["research_time_s"] = round(time.time() - t0, 2)
-        merged["sources_checked"] = sources_to_check
-        merged["cells_deployed"] = 4
+        merged["sources_scraped"] = sources_to_scrape
+        merged["cells_deployed"] = num_cells
         merged["total_findings"] = len(results)
+        merged["scrape_command"] = f"Scrape {sources_to_scrape} for '{topic}'"
         
         self._research_log.append(merged)
         return merged
@@ -87,9 +94,9 @@ class MoEResearch:
             "total_raw_findings": len(findings),
         }
 
-    def research_and_inject(self, topic: str, domain: str = "general") -> str:
+    def research_and_inject(self, topic: str, domain: str = "general", sources: Optional[List[str]] = None) -> str:
         """Research a topic and return a ready-to-use context string."""
-        result = self.research(topic, domain)
+        result = self.research(topic, domain, sources=sources)
         context = f"Research on '{topic}' ({domain}):\n"
         for instr in result.get("key_instructions", [])[:5]:
             context += f"  - {instr}\n"
