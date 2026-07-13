@@ -6,7 +6,8 @@ Architecture:
 
 The synthesizers generate parameters from real data, the main agent reasons with them.
 """
-from .moe_controller import MoEController, ExpertRole, ExpertAssignment
+from .expert_splitter import ExpertSplitter, SplitConfig, ExpertRole, ExpertAssignment
+from .moe_controller import MoEController
 from .expert_splitter import ExpertSplitter, SplitConfig
 from .data_brewer import DataBrewer, BrewingConfig
 from .distillation_pot import DistillationPot, PotConfig
