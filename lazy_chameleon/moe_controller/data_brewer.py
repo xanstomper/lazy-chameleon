@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class BrewingConfig:
     num_pots: int = 8
-    domains: List[str] = field(default_factory=lambda: ["math", "code", "reasoning", "science", "general"])
+    domains: List[str] = field(default_factory=list)  # MoEs point sub-agents to domains
     teachers: List[str] = field(default_factory=lambda: ["gpt-5.5", "claude-opus-4.8", "deepseek-r1", "grok-4.4"])
     samples_per_batch: int = 500
     quality_threshold: float = 0.7

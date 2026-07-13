@@ -152,7 +152,7 @@ class RealSyntheticParameters:
             "routing": "top_k",
             "top_k": max(2, num_experts // 10),
             "split_merge_enabled": True,
-            "agar_io_mode": True,
+            "split_merge_mode": True,
             "num_main_agents": 1,
             "num_synthesizers": num_experts - 1,
         }

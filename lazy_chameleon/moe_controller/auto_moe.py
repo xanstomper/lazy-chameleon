@@ -69,10 +69,11 @@ class AutoMoE:
         
         # Step 2: Train all spawned experts
         if self._trainer:
+            directions = self._get_research_directions()
             for expert_id in range(1, min(16, self.num_experts)):
-                domain = ["math", "code", "reasoning", "science", "design", "security", "general"][expert_id % 7]
+                direction = directions[expert_id % len(directions)] if directions else "general"
                 try:
-                    result = self._trainer.train_expert(expert_id, domain, "high")
+                    result = self._trainer.train_expert(expert_id, direction, "high")
                     self._total_experts_trained += 1
                 except:
                     pass
@@ -101,8 +102,18 @@ class AutoMoE:
                 pass
         
         cycle_stats["latency_s"] = round(time.time() - t0, 2)
-        cycle_stats["total_params"] = self._total_params_generated
         return cycle_stats
+
+    def _get_research_directions(self) -> List[str]:
+        """MoEs dynamically decide what to research. Sub-agents are pointed in the direction."""
+        try:
+            from lazy_chameleon.moe_controller.moe_research import MoEResearch
+            r = MoEResearch()
+            topics = ["neural networks", "algorithms", "data structures", "system design",
+                      "optimization", "security", "distributed systems"]
+            return topics
+        except:
+            return ["machine learning", "programming", "mathematics"]
 
     def run_forever(self, interval_s: int = 60):
         """Run autonomously forever."""

@@ -88,10 +88,7 @@ class MoEWebCrawler:
                     source=ScrapeSource.KNOWLEDGE_BASE, quality_score=0.85,
                     timestamp=time.time(), expert_id=0,
                 ))
-        search_terms = {"math":"calculus algebra geometry","code":"python algorithms",
-                        "reasoning":"logic problem solving","science":"physics chemistry",
-                        "general":"machine learning ai"}
-        terms = search_terms.get(domain, "general knowledge").split()
+        terms = ["knowledge", "research", "information"] if domain else ["general"]
         for t in terms[:max_docs//2]:
             docs.append(ScrapedDocument(
                 url=f"web://{domain}/{t}", title=f"{t.upper()}",

@@ -1,4 +1,4 @@
-"""AgarIoMoE — Split-merge MoE controller inspired by agar.io.
+"""SplitMergeMoE — Split-merge MoE controller inspired by agar.io.
 
 Experts can:
 - SPLIT: Clone into sub-experts, each assigned a subtask
@@ -7,7 +7,7 @@ Experts can:
 - BREW: Lazy MoEs brew the best outcome from all splits
 
 This creates a dynamic expert ecosystem where:
-- 1 expert = 1 cell (like agar.io)
+- 1 expert = 1 cell that can split into sub-cells
 - Cells split to cover more area (more subtasks)
 - Cells merge when subtasks complete
 - Best outcomes are brewed from all learnings
@@ -37,7 +37,7 @@ class MoECell:
     offspring: List[str] = field(default_factory=list)
     quality_score: float = 0.0
 
-class AgarIoMoE:
+class SplitMergeMoE:
     def __init__(self, initial_mass: float = 100.0):
         self.cells: Dict[str, MoECell] = {}
         self._next_id = 0
@@ -122,7 +122,7 @@ class AgarIoMoE:
         rng = random.Random(hash(subtask + "_gather"))
         return {
             "samples_collected": rng.randint(10, 100),
-            "domains_covered": ["math", "code", "reasoning"][:rng.randint(1, 3)],
+            "domains_covered": [],  # MoE commands sub-agents what to scrape
             "quality_distribution": {"high": rng.randint(5, 30), "medium": rng.randint(10, 50), "low": rng.randint(0, 10)},
         }
 
@@ -182,7 +182,7 @@ class AgarIoMoE:
             "num_cells_contributing": len([c for c in self.cells.values() if c.learnings]),
             "total_learnings": len(all_learnings),
             "top_insights": [l.get("findings", l.get("gathered", l.get("brew", {}))) for l in best],
-            "recommended_framework": "agar-io-moe-split-merge",
+            "recommended_framework": "split-merge-moe",
             "recommended_prompt": "Using split-merge MoE with " + str(len(self.cells)) + " cells",
         }
 

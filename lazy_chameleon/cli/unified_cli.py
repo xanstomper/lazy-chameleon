@@ -387,12 +387,12 @@ def _handle_brew(args) -> Any:
 def _handle_moe(args) -> Any:
     try:
         if args.action == "start":
-            from lazy_chameleon.moe_controller.agar_io_moe import AgarIoMoE
-            moe = AgarIoMoE(initial_mass=args.mass)
+            from lazy_chameleon.moe_controller.split_merge_moe import SplitMergeMoE
+            moe = SplitMergeMoE(initial_mass=args.mass)
             cells = moe.split("cell_1", num_splits=args.cells, subtasks=[args.task or "general"] * args.cells)
             return {"status": "started", "main_cell": "cell_1", "mass": args.mass, "split_cells": cells}
         elif args.action == "stats":
-            return {"available": True, "modules": ["AgarIoMoE", "MoEController", "ExpertSplitter"], "config": {"suggested_cells": 4, "suggested_mass": 100.0}}
+            return {"available": True, "modules": ["SplitMergeMoE", "MoEController", "ExpertSplitter"], "config": {"suggested_cells": 4, "suggested_mass": 100.0}}
         return {"action": args.action, "status": "available"}
     except ImportError as e:
         return {"error": f"moe module not available: {e}"}
