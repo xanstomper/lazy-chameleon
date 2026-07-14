@@ -392,3 +392,131 @@ python3 -m lazy_chameleon.main providers
 ---
 
 <p align="center"><sub>Lazy Chameleon · synthetic parameters, real reasoning, tiny budgets.</sub></p>
+
+
+---
+
+## 📊 Project Stats
+
+```
+📁 29 packages      🐍 328 Python files
+📝 59,839 lines      ✅ 308 tests — all passing
+🚀 lazy_chameleon-2.6.0 built
+```
+
+## 🧪 Test Coverage (308 tests)
+
+| Test File | Tests | Covers |
+|-----------|-------|--------|
+| `test_v6_harness.py` | 47 | AgentHarness, CLI, ResearchCoordinator, MoEDistillPot, AutoMoE, KnowledgeBase, MoEFrontier, Research2026, PipelineLoops, WebCrawler, MegaHarness |
+| `test_v4_engines.py` | 72 | Engines, wrappers, inference |
+| `test_v2_sweep.py` | 66 | Core functionality sweep |
+| `test_v3_new_components.py` | 52 | New components, bridges |
+| `test_synthesis_engine.py` | 29 | All 12 synthesis sub-packages |
+| `test_v5_integration.py` | 26 | Full integration pipeline |
+
+## 🤖 AgentHarness — For AI Agents
+
+```python
+from lazy_chameleon.harness import AgentHarness, get_harness
+
+# Get OpenAI-compatible tool schemas
+harness = AgentHarness()
+tools = harness.get_tools()  # [{"type": "function", "function": {...}}]
+
+# Call any tool with structured parameters
+result = harness.call_tool("research_summary")
+# {"success": True, "data": {...}, "latency_s": 0.01}
+```
+
+## 🧠 ResearchCoordinator — All Research Wired
+
+31 research entries loaded from all packages:
+- **23 techniques**: MuonOptimizer, AlphaQ, ROMER, MLA, WINA, SENSE, ART, MemPro, MosaicKV, WaveFilter, CRMA, MoEManipulator, ConstitutionalAI, GrokRealTimeKnowledge, ExpertChoiceRouting, ProgressiveSparsification, MoELoss, MoEGameTheory, BitsMoE, FineVerify, DynamicTokenSelection, LoopUS, UniversalYOCO
+- **3 pipelines**: KnowledgeDistillationPipeline, PipelineOrchestrator, MoELoopPipeline
+- **5 data categories**: architectures, comparison, datasets, prompts, moe_training
+
+## 🔬 Research Packages
+
+```
+lazy_chameleon/
+├── knowledge_base/      # 17 files: providers/, techniques/, pipelines/
+├── moe_frontier/        # 10 files: optimizers/, routing/, compression/
+├── research_2026/       # 9 files: papers/ (BitsMoE, SENSE, ART, etc.)
+├── pipeline_loops/      # 4 files: stages/, orchestrator/, loop_pipeline/
+└── pipeline/
+    └── research_integration.py  # Wires ALL research via ResearchCoordinator
+```
+
+## 📋 CLI Commands (18)
+
+All commands accept `--json` for machine-parseable output:
+
+| Command | Description |
+|---------|-------------|
+| `chameleon enhance` | Generate synthetic parameter context |
+| `chameleon prompts` | Browse/search 278 leaked system prompts |
+| `chameleon data` | Access 1200+ training examples |
+| `chameleon models` | List/compare 11+ frontier models |
+| `chameleon brew` | Brew data using distillation pots |
+| `chameleon moe` | Control MoE expert split/merge |
+| `chameleon distill` | Run distillation pipelines |
+| `chameleon token-saver` | Optimize prompts for token efficiency |
+| `chameleon research` | Access all research data |
+| `chameleon config` | View configuration |
+| `chameleon engines` | Run inference engines |
+| `chameleon wrappers` | Provider wrappers (single model) |
+| `chameleon frameworks` | Eval/test frameworks |
+| `chameleon methodology` | Prompt/training methods |
+| `chameleon synthesizers` | Generate synthetic data |
+| `chameleon longcat` | LongCat-2 MoE framework |
+| `chameleon owl-alpha` | OWL-Alpha distillation |
+| `chameleon tokenize` | Optimize tokenization |
+
+## 🔧 Quick Start
+
+```bash
+# One-line enhancement
+chameleon enhance "Build a Redis rate limiter" --mode hard
+
+# Research access
+chameleon research summary --json
+chameleon research techniques --json
+
+# Auto-run MoE system (no user input)
+python3 -c "from lazy_chameleon.moe_controller import AutoMoE; AutoMoE().start_async()"
+
+# Generate synthetic parameters
+python3 -c "from lazy_chameleon.brewing.massive_param_generator import MassiveParameterGenerator; m=MassiveParameterGenerator(); m.generate_massive(2000.0)"
+```
+
+## 🏗️ Architecture
+
+```
+CLI (chameleon <cmd> <action> --json)
+ │
+ ├── harness/       AgentHarness, MegaHarness (for LLM injection)
+ ├── moe_controller/ AutoMoE, SplitMergeMoE, MoEWebCrawler, MoEDistillPot
+ ├── knowledge_base/ 17 files of frontier model research
+ ├── moe_frontier/   10 frontier MoE optimization techniques
+ ├── research_2026/  9 papers from June-July 2026 arXiv
+ ├── pipeline_loops/ LoopUS, YOCO, orchestration
+ ├── brewing/        MassiveParameterGenerator, recipes
+ ├── token_saver/    TokenMinimizer (70-90% reduction)
+ ├── data/           1200+ hardcoded examples, 47 datasets
+ ├── prompts/        278 leaked system prompts
+ └── synthesis_engine/ 12 sub-packages (merging, distillation, memory, etc.)
+```
+
+## 🦎 Core Philosophy
+
+Lazy Chameleon is a **synthetic parameter generator** and **MoE optimization system**.
+It is **not** a server, **not** an API, and **not** a GUI. It is a library and CLI
+that any LLM can use as a tool to enhance its capabilities.
+
+Key principles:
+1. **No model fallback** — single model, no retry chains
+2. **No user input needed** — fully automatic (AutoMoE)
+3. **No dashboard** — CLI and harness only
+4. **All real data** — zero mock, zero fake, zero placeholder
+5. **LLM-first** — JSON output, tool schemas, agent harness
